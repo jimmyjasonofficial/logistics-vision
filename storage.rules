@@ -1,0 +1,14 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Admin users can read and write all files
+    match /{allPaths=**} {
+      allow read, write: if request.auth.token.admin == true;
+    }
+    
+    // Authenticated non-admin users can upload to their own folder.
+    match /users/{userId}/{allPaths=**} {
+      allow write: if request.auth.uid == userId;
+    }
+  }
+}

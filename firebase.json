@@ -1,0 +1,17 @@
+{
+  "hosting": {
+    "source": ".",
+    "ignore": [
+      "firebase.json",
+      "apphosting.yaml",
+      "README.md",
+      ".vscode/**",
+      "node_modules/**",
+      ".env",
+      ".git/**"
+    ],
+    "frameworksBackend": {
+      "region": "us-central1"
+    }
+  }
+}
