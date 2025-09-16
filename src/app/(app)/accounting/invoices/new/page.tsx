@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useFieldArray, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
@@ -118,31 +118,63 @@ export default function NewInvoicePage() {
   const [subtotal, setSubtotal] = useState(0);
   const [totalTax, setTotalTax] = useState(0);
   const [total, setTotal] = useState(0);
+  // useEffect(() => {
+  //   if (!lineItems) return;
+  //   let newSubtotal = 0;
+  //   let newTotalTax = 0;
 
-  useEffect(() => {
-    if (!lineItems) return;
-    let newSubtotal = 0;
-    let newTotalTax = 0;
-
-    lineItems.forEach(item => {
-      const quantity = Number(item.quantity) || 0;
-      const unitPrice = Number(item.unitPrice) || 0;
-      const discount = Number(item.discount) || 0;
+  //   lineItems.forEach(item => {
+  //     const quantity = Number(item.quantity) || 0;
+  //     const unitPrice = Number(item.unitPrice) || 0;
+  //     const discount = Number(item.discount) || 0;
       
-      const lineTotal = quantity * unitPrice;
-      const discountAmount = lineTotal * (discount / 100);
-      const discountedTotal = lineTotal - discountAmount;
-      const taxAmount = item.taxRate === 'Tax on Sales (15%)' ? (discountedTotal * (TAX_RATE_PERCENTAGE / 100)) : 0;
+  //     const lineTotal = quantity * unitPrice;
+  //     const discountAmount = lineTotal * (discount / 100);
+  //     const discountedTotal = lineTotal - discountAmount;
+  //     const taxAmount = item.taxRate === 'Tax on Sales (15%)' ? (discountedTotal * (TAX_RATE_PERCENTAGE / 100)) : 0;
       
-      newSubtotal += discountedTotal;
-      newTotalTax += taxAmount;
-    });
+  //     newSubtotal += discountedTotal;
+  //     newTotalTax += taxAmount;
+  //   });
 
-    setSubtotal(newSubtotal);
-    setTotalTax(newTotalTax);
-    setTotal(newSubtotal + newTotalTax);
-  }, [lineItems]);
-  
+  //   setSubtotal(newSubtotal);
+  //   setTotalTax(newTotalTax);
+  //   setTotal(newSubtotal + newTotalTax);
+  // }, [lineItems]);
+  const watchedLineItems = useWatch({
+  control: form.control,
+  name: "lineItems",
+  defaultValue: form.getValues("lineItems"),
+});
+
+useEffect(() => {
+  if (!watchedLineItems) return;
+
+  let newSubtotal = 0;
+  let newTotalTax = 0;
+
+  watchedLineItems.forEach((item) => {
+    const quantity = Number(item.quantity) || 0;
+    const unitPrice = Number(item.unitPrice) || 0;
+    const discount = Number(item.discount) || 0;
+
+    const lineTotal = quantity * unitPrice;
+    const discountAmount = lineTotal * (discount / 100);
+    const discountedTotal = lineTotal - discountAmount;
+
+    const taxAmount =
+      item.taxRate === "Tax on Sales (15%)"
+        ? discountedTotal * (TAX_RATE_PERCENTAGE / 100)
+        : 0;
+
+    newSubtotal += discountedTotal;
+    newTotalTax += taxAmount;
+  });
+
+  setSubtotal(newSubtotal);
+  setTotalTax(newTotalTax);
+  setTotal(newSubtotal + newTotalTax);
+}, [watchedLineItems])
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -152,12 +184,11 @@ export default function NewInvoicePage() {
 
   async function onSubmit(data: InvoiceFormValues) {
     setLoading(true);
-
+    
     const customer = customers.find(c => c.id === data.customerId);
-
     const formData = new FormData();
     formData.append('customerId', data.customerId);
-    formData.append('customer', customer?.company || 'Unknown Customer');
+    formData.append('customer', customer?.name || 'Unknown Customer');
     if (data.reference) formData.append('reference', data.reference);
     formData.append('dateIssued', data.dateIssued);
     formData.append('dueDate', data.dueDate);
@@ -201,7 +232,7 @@ export default function NewInvoicePage() {
     return <div className="flex h-full w-full items-center justify-center p-8"><Loader2 className="h-16 w-16 animate-spin" /></div>;
   }
 
-  const customerOptions = customers.map(c => ({ value: c.id, label: c.company }));
+  const customerOptions = customers.map(c => ({ value: c.id, label: c.name }));
 
   return (
     <div className="flex-1 space-y-4">

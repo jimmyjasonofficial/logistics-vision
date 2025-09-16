@@ -9,9 +9,10 @@ export type Employee = {
   email: string;
   phone: string;
   license?: string;
+  license_file?: string;
   licenseExpiry?: string;
   status: 'Active' | 'On Leave' | 'Inactive';
-  photoUrl: string;
+  profile_image: string | undefined;
   totalTrips: number;
   role: 'Driver' | 'Senior Driver' | 'Admin' | 'Operations' | 'Finance' | 'Assistance' | 'Dispatcher' | 'Mechanic' | 'Accountant' | 'HR Manager' | 'User';
   baseSalary?: number;
@@ -27,7 +28,7 @@ export async function createEmployee(employeeData: Partial<Omit<EmployeeData, 'i
   const newEmployee: Employee = {
       id: docRef.id,
       totalTrips: 0,
-      photoUrl: `https://i.pravatar.cc/150?u=${docRef.id}`,
+      profile_image: employeeData?.profile_image,
       name: employeeData.name || 'Unknown',
       email: employeeData.email || 'unknown@example.com',
       phone: employeeData.phone || 'N/A',

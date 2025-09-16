@@ -82,7 +82,7 @@ export function TripTable({ trips }: TripTableProps) {
               </Link>
             </TableCell>
             <TableCell className="hidden sm:table-cell">
-               <Link href={`/customers/${trip.customerId}`} className="text-primary hover:underline">{trip.customer}</Link>
+               <Link href={`/customers/${trip.customerId}`} className="text-primary hover:underline">{trip.driver}</Link>
             </TableCell>
             <TableCell className="hidden lg:table-cell">
                 {trip.origin} to {trip.destination}

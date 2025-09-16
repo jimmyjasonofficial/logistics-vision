@@ -8,6 +8,7 @@ import { EmployeeList } from './employee-list';
 
 export default async function EmployeesPage() {
     const employees = await getEmployees();
+    console.log(employees)
 
   return (
     <div className="flex-1 space-y-8">

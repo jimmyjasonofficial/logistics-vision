@@ -30,7 +30,7 @@ export function TripsClientPage({ trips }: { trips: Trip[] }) {
       cancelledTrips: trips.filter((trip) => trip.status === 'Cancelled'),
     };
   }, [trips]);
-
+console.log(trips)
   return (
     <Tabs defaultValue="all">
       <TabsList className="grid w-full grid-cols-6">

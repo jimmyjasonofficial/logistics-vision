@@ -1,8 +1,8 @@
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { PlusCircle, ArrowLeft } from 'lucide-react';
-import { getTrips } from '@/services/trip-service';
-import { TripsClientPage } from './trips-client';
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { PlusCircle, ArrowLeft } from "lucide-react";
+import { getTrips } from "@/services/trip-service";
+import { TripsClientPage } from "./trips-client";
 
 export default async function TripsPage() {
   const trips = await getTrips();
@@ -26,8 +26,8 @@ export default async function TripsPage() {
         <div className="flex items-center space-x-2">
           <Button asChild>
             <Link href="/trips/new">
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Create New Trip
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Create New Trip
             </Link>
           </Button>
         </div>

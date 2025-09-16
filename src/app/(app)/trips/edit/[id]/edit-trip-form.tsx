@@ -190,7 +190,7 @@ export function EditTripForm({ trip, customers, drivers, vehicles }: EditTripFor
                   )}
                 />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
                   name="origin"
@@ -229,7 +229,81 @@ export function EditTripForm({ trip, customers, drivers, vehicles }: EditTripFor
                     </FormItem>
                   )}
                 />
-              </div>
+              </div> */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <FormField
+                              control={form.control}
+                              name="origin"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Origin</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="Enter origin..."
+                                      {...field}
+                                      disabled={loading}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            {/* <FormField
+                              control={form.control}
+                              name="origin"
+                              render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                  <FormLabel>Origin</FormLabel>
+                                  <Combobox
+                                    options={mockLocations}
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    placeholder="Select origin..."
+                                    searchPlaceholder="Search locations..."
+                                    emptyPlaceholder="No location found."
+                                    disabled={loading}
+                                  />
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            /> */}
+                            {/* <FormField
+                              control={form.control}
+                              name="destination"
+                              render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                  <FormLabel>Destination</FormLabel>
+                                  <Combobox
+                                    options={mockLocations}
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    placeholder="Select destination..."
+                                    searchPlaceholder="Search locations..."
+                                    emptyPlaceholder="No location found."
+                                    disabled={loading}
+                                  />
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            /> */}
+                               <FormField
+                              control={form.control}
+                              name="destination"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Destination</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="Enter destination..."
+                                      {...field}
+                                      disabled={loading}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}

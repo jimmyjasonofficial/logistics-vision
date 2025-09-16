@@ -8,6 +8,7 @@ import { getDownloadUrl } from './storage-service';
 export type Quote = {
   id: string;
   customer: string;
+  driver: string;
   customerId: string;
   dateIssued: string;
   expiryDate: string;

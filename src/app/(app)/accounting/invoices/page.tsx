@@ -14,8 +14,7 @@ import { InvoiceTable } from './invoice-table';
 import { getInvoices } from '@/services/invoice-service';
 
 export default async function InvoicesPage() {
-  const invoices = await getInvoices();
-  
+  const invoices = await getInvoices();  
   const allInvoices = invoices;
   const paidInvoices = invoices.filter((invoice) => invoice.status === 'Paid');
   const unpaidInvoices = invoices.filter((invoice) => invoice.status === 'Unpaid');

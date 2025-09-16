@@ -2,6 +2,7 @@
 'use server';
 
 import { storage, initializationError, ensureDbConnected } from '@/lib/firebase-admin';
+import { deleteObject, ref } from 'firebase/storage';
 
 export type DocumentFile = {
     name: string;
@@ -21,7 +22,7 @@ export type AttachmentFile = {
 };
 
 export async function uploadFile(file: File, path: string): Promise<{ gsPath: string }> {
-  ensureDbConnected(); // This implicitly checks the overall admin connection
+  ensureDbConnected(); 
   if (!storage) {
     throw new Error(initializationError || 'Firebase Storage not configured. Please check your service account configuration.');
   }
@@ -33,7 +34,7 @@ export async function uploadFile(file: File, path: string): Promise<{ gsPath: st
     metadata: { contentType: file.type },
   });
 
-  // Return the full GCS path
+
   return { gsPath: `gs://${storage.name}/${filePath}` };
 }
 
@@ -60,7 +61,15 @@ export async function getDownloadUrl(gsPath: string | undefined | null): Promise
     return null;
   }
 }
-
+export async function deleteFile(fileUrl: string) {
+  try {
+    const storageRef = ref(storage, fileUrl);
+    await deleteObject(storageRef);
+    console.log("Old file deleted:", fileUrl);
+  } catch (error) {
+    console.error("Error deleting file:", error);
+  }
+}
 export async function listAllAttachments(): Promise<AttachmentFile[]> {
     try {
         ensureDbConnected(); // This implicitly checks the overall admin connection
