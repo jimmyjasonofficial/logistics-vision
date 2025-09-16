@@ -153,7 +153,7 @@ useEffect(() => {
   let newSubtotal = 0;
   let newTotalTax = 0;
 
-  watchedLineItems.forEach((item) => {
+  watchedLineItems?.forEach((item) => {
     const quantity = Number(item.quantity) || 0;
     const unitPrice = Number(item.unitPrice) || 0;
     const discount = Number(item.discount) || 0;
@@ -194,7 +194,7 @@ useEffect(() => {
     formData.append('dueDate', data.dueDate);
     formData.append('taxType', data.taxType);
     
-    data.lineItems.forEach((item, index) => {
+    data?.lineItems.forEach((item, index) => {
         Object.entries(item).forEach(([key, value]) => {
             if (value !== undefined && value !== null) {
                 formData.append(`lineItems[${index}].${key}`, String(value));

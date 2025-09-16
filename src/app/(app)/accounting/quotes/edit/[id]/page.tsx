@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useFieldArray, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
@@ -87,28 +87,37 @@ export default function EditQuotePage() {
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: "lineItems"
+    name: "lineItems",
   });
 
-  const lineItems = form.watch('lineItems');
+  const watchedLineItems = useWatch({
+    control: form.control,
+    name: "lineItems",
+    defaultValue: form.getValues("lineItems"),
+  });
+
   const [subtotal, setSubtotal] = useState(0);
   const [totalTax, setTotalTax] = useState(0);
   const [total, setTotal] = useState(0);
 
   useEffect(() => {
+    if (!watchedLineItems) return;
     let newSubtotal = 0;
     let newTotalTax = 0;
 
-    lineItems.forEach(item => {
+    watchedLineItems?.forEach((item) => {
       const quantity = Number(item.quantity) || 0;
       const unitPrice = Number(item.unitPrice) || 0;
       const discount = Number(item.discount) || 0;
-      
+
       const lineTotal = quantity * unitPrice;
       const discountAmount = lineTotal * (discount / 100);
       const discountedTotal = lineTotal - discountAmount;
-      const taxAmount = item.taxRate === 'Tax on Sales (15%)' ? (discountedTotal * (TAX_RATE_PERCENTAGE / 100)) : 0;
-      
+      const taxAmount =
+        item.taxRate === "Tax on Sales (15%)"
+          ? discountedTotal * (TAX_RATE_PERCENTAGE / 100)
+          : 0;
+
       newSubtotal += discountedTotal;
       newTotalTax += taxAmount;
     });
@@ -116,7 +125,8 @@ export default function EditQuotePage() {
     setSubtotal(newSubtotal);
     setTotalTax(newTotalTax);
     setTotal(newSubtotal + newTotalTax);
-  }, [lineItems]);
+  }, [watchedLineItems]);
+
   
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -133,14 +143,14 @@ export default function EditQuotePage() {
 
     const formData = new FormData();
     formData.append('customerId', data.customerId);
-    formData.append('customer', customer?.company || 'Unknown Customer');
+    formData.append('customer', customer?.name || 'Unknown Customer');
     if (data.reference) formData.append('reference', data.reference);
     formData.append('dateIssued', data.dateIssued);
     formData.append('expiryDate', data.expiryDate);
     formData.append('status', data.status);
     formData.append('taxType', data.taxType);
     
-    data.lineItems.forEach((item, index) => {
+    data?.lineItems.forEach((item, index) => {
         Object.entries(item).forEach(([key, value]) => {
             if (value !== undefined && value !== null) {
                 formData.append(`lineItems[${index}].${key}`, String(value));
@@ -183,7 +193,7 @@ export default function EditQuotePage() {
     return notFound();
   }
 
-  const customerOptions = customers.map(c => ({ value: c.id, label: c.company }));
+  const customerOptions = customers.map(c => ({ value: c.id, label: c.name }));
 
   return (
     <div className="flex-1 space-y-4">
