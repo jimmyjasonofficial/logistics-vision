@@ -20,9 +20,7 @@ function initializeFirebaseAdmin() {
       console.log("✅ Using existing Firebase Admin app.");
     } else {
       // For production, rely on ADC (Application Default Credentials)
-      adminApp = initializeApp({
-        // storageBucket: 'logisticsvisionbeta.firebasestorage.app', // optional
-      });
+      adminApp = initializeApp();
       console.log("✅ Firebase Admin SDK initialized using service account.");
     }
 
@@ -32,15 +30,16 @@ function initializeFirebaseAdmin() {
       console.log('Admin App adminApp.options?.storageBucket', adminApp.options?.storageBucket)
       console.log("✅ Firestore connected successfully.");
 
-      if(adminApp.options?.storageBucket !== null && adminApp.options?.storageBucket !== undefined){
-        storage = getStorage(adminApp).bucket(adminApp.options?.storageBucket);
+      storage = getStorage(adminApp).bucket();
+      console.log('Storage Auto Configured')
 
-        console.log('Storage Auto Configured')
-      }
-      else{
-        storage = getStorage(adminApp).bucket('logisticsvisionbeta.firebasestorage.app');
-        console.log('Storage manually Configured')
-      }
+      // if(adminApp.options?.storageBucket !== null && adminApp.options?.storageBucket !== undefined){
+       
+      // }
+      // else{
+      //   storage = getStorage(adminApp).bucket('logisticsvisionbeta.firebasestorage.app');
+      //   console.log('Storage manually Configured')
+      // }
 
     } else {
       auth = undefined;
