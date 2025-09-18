@@ -21,7 +21,7 @@ function initializeFirebaseAdmin() {
     } else {
       // For production, rely on ADC (Application Default Credentials)
       adminApp = initializeApp({
-        storageBucket: 'logisticsvisionbeta.firebasestorage.app', // optional
+        // storageBucket: 'logisticsvisionbeta.firebasestorage.app', // optional
       });
       console.log("✅ Firebase Admin SDK initialized using service account.");
     }
@@ -29,9 +29,18 @@ function initializeFirebaseAdmin() {
     if (adminApp) {
       auth = getAuth(adminApp);
       db = getFirestore(adminApp);
-
+      console.log('Admin App adminApp.options?.storageBucket', adminApp.options?.storageBucket)
       console.log("✅ Firestore connected successfully.");
-      storage = getStorage(adminApp).bucket('logisticsvisionbeta.firebasestorage.app');
+
+      if(adminApp.options?.storageBucket !== null && adminApp.options?.storageBucket !== undefined){
+        storage = getStorage(adminApp).bucket(adminApp.options?.storageBucket);
+
+        console.log('Storage Auto Configured')
+      }
+      else{
+        storage = getStorage(adminApp).bucket('logisticsvisionbeta.firebasestorage.app');
+        console.log('Storage manually Configured')
+      }
 
     } else {
       auth = undefined;
@@ -54,7 +63,7 @@ function initializeFirebaseAdmin() {
 //       // Initialize new app
 //       adminApp = initializeApp({
 //         credential: cert(serviceAccount as any),
-//         storageBucket: process.env.FIREBASE_STORAGE_BUCKET || undefined, // optional
+//         // storageBucket: process.env.FIREBASE_STORAGE_BUCKET || undefined, // optional
 //       });
 //       console.log("✅ Firebase Admin SDK initialized using service account.");
 //     }
@@ -64,13 +73,13 @@ function initializeFirebaseAdmin() {
 //       db = getFirestore(adminApp);
 
 //       console.log("✅ Firestore connected successfully.");
-
-//       if (process.env.FIREBASE_STORAGE_BUCKET) {
-//         storage = getStorage(adminApp).bucket(process.env.FIREBASE_STORAGE_BUCKET);
-//         console.log(`✅ Storage connected: ${process.env.FIREBASE_STORAGE_BUCKET}`);
-//       } else {
-//         console.warn("⚠ FIREBASE_STORAGE_BUCKET not set. Storage unavailable.");
-//       }
+//       console.log("adminApp Bucket", adminApp.options)
+//       // if (process.env.FIREBASE_STORAGE_BUCKET) {
+//         storage = getStorage(adminApp).bucket('logisticsvisionbeta.firebasestorage.app');
+//         console.log(`✅ Storage connected: logisticsvisionbeta.firebasestorage.app`);
+//       // } else {
+//       //   console.warn("⚠ FIREBASE_STORAGE_BUCKET not set. Storage unavailable.");
+//       // }
 //     } else {
 //       auth = undefined;
 //       db = undefined;
