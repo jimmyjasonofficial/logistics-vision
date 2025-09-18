@@ -120,7 +120,7 @@ export function NewTripForm({
 
     const tripData = {
       ...data,
-      customer: customer?.company || "Unknown Customer",
+      customer: customer?.name || "Unknown Customer",
       driver: driver?.name || "Unknown Driver",
       truck: vehicle?.licensePlate || "Unknown Vehicle",
       notes: data.notes ?? "", // fix type issue

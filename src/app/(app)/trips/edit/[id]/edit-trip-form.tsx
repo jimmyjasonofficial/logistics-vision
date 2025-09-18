@@ -115,7 +115,7 @@ export function EditTripForm({
 
     const tripData = {
       ...data,
-      customer: customer?.company || "Unknown Customer",
+      customer: customer?.name || "Unknown Customer",
       driver: driver?.name || "Unknown Driver",
       truck: vehicle?.licensePlate || "Unknown Vehicle",
     };
@@ -141,7 +141,7 @@ export function EditTripForm({
 
   const customerOptions = customers.map((c) => ({
     value: c.id,
-    label: c.company,
+    label: c.name,
   }));
   const driverOptions = drivers.map((d) => ({ value: d.id, label: d.name }));
   const vehicleOptions = vehicles.map((v) => ({
