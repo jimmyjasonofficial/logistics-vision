@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, PlusCircle, File as FileIcon, Truck as TruckIcon, MoreHorizontal } from 'lucide-react';
