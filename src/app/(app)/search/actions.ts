@@ -77,7 +77,7 @@ export async function searchAction(query: string): Promise<SearchResult[]> {
       dataResults.push({
         type: 'Customer',
         id: customer.id,
-        title: customer.company,
+        title: customer.name,
         description: `Contact: ${highlight(customer.name, query)} (${highlight(customer.email, query)})`,
         url: `/customers/${customer.id}`
       });
@@ -136,12 +136,12 @@ export async function searchAction(query: string): Promise<SearchResult[]> {
   
   const allResults = [...pageResults, ...dataResults];
 
-  // A simple relevance sort: matches in title/id are more important.
-  allResults.sort((a, b) => {
-    const aTitleMatch = a.title.toLowerCase().includes(lowerCaseQuery) ? -1 : 0;
-    const bTitleMatch = b.title.toLowerCase().includes(lowerCaseQuery) ? -1 : 0;
-    return aTitleMatch - bTitleMatch;
-  });
+  // // A simple relevance sort: matches in title/id are more important.
+  // allResults.sort((a, b) => {
+  //   const aTitleMatch = a.title.toLowerCase().includes(lowerCaseQuery) ? -1 : 0;
+  //   const bTitleMatch = b.title.toLowerCase().includes(lowerCaseQuery) ? -1 : 0;
+  //   return aTitleMatch - bTitleMatch;
+  // });
 
   return allResults.slice(0, 50); // Limit results
 }

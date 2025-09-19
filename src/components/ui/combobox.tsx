@@ -68,11 +68,27 @@ export function Combobox({
             <CommandEmpty>{emptyPlaceholder}</CommandEmpty>
             <CommandGroup>
               {options.map((option) => (
+                // <CommandItem
+                //   key={option.value}
+                //   value={option.value}
+                //   onSelect={(currentValue) => {
+                //     onChange(currentValue === value ? "" : currentValue)
+                //     setOpen(false)
+                //   }}
+                // >
+                //   <Check
+                //     className={cn(
+                //       "mr-2 h-4 w-4",
+                //       value === option.value ? "opacity-100" : "opacity-0"
+                //     )}
+                //   />
+                //   {option.label}
+                // </CommandItem>
                 <CommandItem
                   key={option.value}
-                  value={option.value}
+                  value={option.label} // search matches label + id
                   onSelect={(currentValue) => {
-                    onChange(currentValue === value ? "" : currentValue)
+                    onChange(option.value) // always pass back the actual id
                     setOpen(false)
                   }}
                 >
