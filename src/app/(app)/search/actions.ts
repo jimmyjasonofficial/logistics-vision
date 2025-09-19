@@ -1,6 +1,8 @@
 
 'use server';
 
+export const dynamic = 'force-dynamic';
+
 import { getCustomers } from '@/services/customer-service';
 import { getTrips } from '@/services/trip-service';
 import { getInvoices } from '@/services/invoice-service';

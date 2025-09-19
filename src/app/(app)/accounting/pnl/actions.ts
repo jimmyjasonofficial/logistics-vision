@@ -1,6 +1,8 @@
 
 'use server';
 
+export const dynamic = 'force-dynamic';
+
 import {
   getFinancialAnalysis,
   FinancialAnalystInput,

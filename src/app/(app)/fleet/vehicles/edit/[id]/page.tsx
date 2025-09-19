@@ -1,3 +1,6 @@
+
+export const dynamic = 'force-dynamic';
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Loader2 } from 'lucide-react';
