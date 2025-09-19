@@ -23,6 +23,8 @@ export async function createFuelLog(data: FuelLogData): Promise<FuelLog> {
       ...data,
   };
   await docRef.set(newLog);
+  // const newLog = await createDocumentWithCustomId<FuelLogData>('expenses', 'EXP', data);
+  
   return newLog;
 }
 

@@ -1,4 +1,6 @@
 "use client";
+
+export const dynamic = 'force-dynamic';
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,7 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Download, MoreHorizontal } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import type { Employee } from "@/services/driver-service";
+import type { Employee } from "@/services/employee-service";
 
 const getStatusVariant = (status: string) => {
   switch (status) {

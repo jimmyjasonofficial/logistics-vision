@@ -4,6 +4,7 @@
 import { ensureDbConnected } from '@/lib/firebase-admin';
 import type { LineItem } from './invoice-service'; // Reuse line item type
 import { getDownloadUrl } from './storage-service';
+import { createDocumentWithCustomId } from './firestore-service';
 
 export type Quote = {
   id: string;
@@ -19,7 +20,7 @@ export type Quote = {
   subtotal: number;
   totalTax: number;
   total: number;
-  hasAttachment?: boolean;
+  hasAttachment?: boolean | false;
   attachmentPath?: string;
 };
 
@@ -29,15 +30,18 @@ export type QuoteWithUrl = Quote & {
 
 export type QuoteData = Omit<Quote, 'id'>;
 
-export async function createQuote(quoteData: Partial<QuoteData>): Promise<Quote> {
+export async function createQuote(quoteData: QuoteData): Promise<Quote> {
   const db = ensureDbConnected();
-  const docRef = db.collection('quotes').doc();
-  const newQuote: Quote = {
-      id: docRef.id,
-      hasAttachment: false,
-      ...quoteData,
-  } as Quote;
-  await docRef.set(newQuote);
+  // const docRef = db.collection('quotes').doc();
+  // const newQuote: Quote = {
+  //     id: docRef.id,
+  //     hasAttachment: false,
+  //     ...quoteData,
+  // } as Quote;
+  // await docRef.set(newQuote);
+  
+  const newQuote = await createDocumentWithCustomId<QuoteData>('quotes', 'Q', quoteData);
+
   return newQuote;
 }
 

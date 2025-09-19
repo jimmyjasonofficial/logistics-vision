@@ -2,6 +2,7 @@
 'use server';
 
 import { ensureDbConnected } from '@/lib/firebase-admin';
+import { createDocumentWithCustomId } from './firestore-service';
 
 export type Payout = {
   id: string;
@@ -15,9 +16,14 @@ export type PayoutData = Omit<Payout, 'id'>;
 
 export async function createPayout(data: PayoutData): Promise<Payout> {
   const db = ensureDbConnected();
-  const docRef = db.collection('payouts').doc();
-  const newPayout: Payout = { id: docRef.id, ...data };
-  await docRef.set(newPayout);
+  // const docRef = db.collection('payouts').doc();
+  // const newPayout: Payout = { id: docRef.id, ...data };
+
+  // await docRef.set(newPayout);
+  
+  const newPayout = await createDocumentWithCustomId<PayoutData>('payouts', 'PO', data);
+
+
   return newPayout;
 }
 

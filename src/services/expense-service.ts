@@ -3,6 +3,7 @@
 
 import { ensureDbConnected } from '@/lib/firebase-admin';
 import { getDownloadUrl } from './storage-service';
+import { createDocumentWithCustomId } from '../services/firestore-service';
 
 export type Expense = {
   id: string;
@@ -12,7 +13,7 @@ export type Expense = {
   description: string;
   paidBy: 'Cash' | 'Card' | 'EFT' | 'Petty Cash';
   tripId?: string | null;
-  hasAttachment: boolean;
+  hasAttachment: boolean | false;
   notes?: string;
   attachmentPath?: string;
 };
@@ -23,15 +24,19 @@ export type ExpenseWithUrl = Expense & {
 
 export type ExpenseData = Omit<Expense, 'id'>;
 
-export async function createExpense(expenseData: Partial<ExpenseData>): Promise<Expense> {
+export async function createExpense(expenseData: ExpenseData): Promise<Expense> {
   const db = ensureDbConnected();
-  const docRef = db.collection('expenses').doc();
-  const newExpense = {
-      id: docRef.id,
-      hasAttachment: false, // Default to false
-      ...expenseData,
-  } as Expense;
-  await docRef.set(newExpense);
+  // const docRef = db.collection('expenses').doc();
+  // const newExpense = {
+  //     id: docRef.id,
+  //     hasAttachment: false, // Default to false
+  //     ...expenseData,
+  // } as Expense;
+
+  const newExpense = await createDocumentWithCustomId<ExpenseData>('expenses', 'EXP', expenseData);
+  // await docRef.set(newExpense);
+
+
   return newExpense;
 }
 

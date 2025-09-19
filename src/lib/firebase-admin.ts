@@ -33,14 +33,6 @@ function initializeFirebaseAdmin() {
       storage = getStorage(adminApp).bucket();
       console.log('Storage Auto Configured')
 
-      // if(adminApp.options?.storageBucket !== null && adminApp.options?.storageBucket !== undefined){
-       
-      // }
-      // else{
-      //   storage = getStorage(adminApp).bucket('logisticsvisionbeta.firebasestorage.app');
-      //   console.log('Storage manually Configured')
-      // }
-
     } else {
       auth = undefined;
       db = undefined;
@@ -90,6 +82,7 @@ function initializeFirebaseAdmin() {
 //     console.error(initializationError);
 //   }
 // }
+
 // Initialize Firebase Admin immediately
 initializeFirebaseAdmin();
 

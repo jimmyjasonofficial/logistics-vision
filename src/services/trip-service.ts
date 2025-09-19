@@ -2,6 +2,7 @@
 'use server';
 
 import { ensureDbConnected } from '@/lib/firebase-admin';
+import { createDocumentWithCustomId } from '../services/firestore-service';
 
 export type Trip = {
   id: string;
@@ -26,13 +27,16 @@ export type TripData = Omit<Trip, 'id'>;
 export async function createTrip(tripData: TripData): Promise<Trip> {
   const db = ensureDbConnected();
   const docRef = db.collection('trips').doc();
-  const newTrip = {
-      id: docRef.id,
-      ...tripData,
-  };
-  await docRef.set(newTrip);
+  // const newTrip = {
+  //     id: docRef.id,
+  //     ...tripData,
+  // };
+
+  const newTrip = await createDocumentWithCustomId<TripData>('trips', 'TRPS', tripData);
+  // await docRef.set(newTrip);
   return newTrip;
 }
+
 
 export async function updateTrip(id: string, tripData: Partial<TripData>): Promise<void> {
   const db = ensureDbConnected();

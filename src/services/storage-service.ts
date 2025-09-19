@@ -2,7 +2,7 @@
 'use server';
 
 import { storage, initializationError, ensureDbConnected } from '@/lib/firebase-admin';
-import { deleteObject, ref } from 'firebase/storage';
+import {  ref, deleteObject } from "firebase/storage";
 
 export type DocumentFile = {
     name: string;
@@ -21,6 +21,40 @@ export type AttachmentFile = {
     path: string;
 };
 
+// export async function uploadFile(file: File, path: string): Promise<{ gsPath: string }> {
+//   ensureDbConnected(); 
+//   if (!storage) {
+//     throw new Error(initializationError || 'Firebase Storage not configured. Please check your service account configuration.');
+//   }
+//   console.log('pathh ' , file, path)
+
+//   const filePath = `${path}/${file.name}`;
+//   const fileRef = ref(storage, filePath);
+  
+//   const uploadTask = uploadBytesResumable(fileRef, file);
+
+//   return new Promise((resolve, reject) => {
+//     uploadTask.on(
+//       'state_changed',
+//       (snapshot) => {
+//         // You can monitor progress here, if needed
+//         const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+//         console.log('Upload is ' + progress + '% done');
+//       },
+//       (error) => {
+//         console.error(error);
+//         reject(new Error("Upload failed"));
+//       },
+//       async () => {
+//         // Once upload completes, get the download URL
+//         const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+//         resolve({ gsPath: downloadURL });
+//       }
+//     );
+//   });
+// }
+
+
 export async function uploadFile(file: File, path: string): Promise<{ gsPath: string }> {
   ensureDbConnected(); 
   if (!storage) {
@@ -37,6 +71,9 @@ export async function uploadFile(file: File, path: string): Promise<{ gsPath: st
 
   return { gsPath: `gs://${storage.name}/${filePath}` };
 }
+
+// Upload with progress tracking and retries
+
 
 export async function getDownloadUrl(gsPath: string | undefined | null): Promise<string | null> {
   try {

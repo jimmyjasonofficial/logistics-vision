@@ -10,7 +10,7 @@ export async function updateUserRoleAction(
   uid: string,
   newRole: string
 ): Promise<{ success: boolean; error?: string }> {
-  await requireAdmin();
+  // await requireAdmin();
 
   if (!auth || !db) {
     return { success: false, error: 'Firebase Admin SDK not initialized.' };

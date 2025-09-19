@@ -3,6 +3,8 @@
 
 import { ensureDbConnected } from '@/lib/firebase-admin';
 
+import { createDocumentWithCustomId } from '../services/firestore-service';
+
 export type Customer = {
   id: string;
   name: string;
@@ -18,12 +20,14 @@ export type CustomerData = Omit<Customer, 'id'>;
 
 export async function createCustomer(customerData: CustomerData): Promise<Customer> {
   const db = ensureDbConnected();
-  const docRef = db.collection('customers').doc();
-  const newCustomer = {
-      id: docRef.id,
-      ...customerData,
-  };
-  await docRef.set(newCustomer);
+  // const docRef = db.collection('customers').doc();
+  // const newCustomer = {
+  //     id: docRef.id,
+  //     ...customerData,
+  // };
+  // await docRef.set(newCustomer);
+  const newCustomer = await createDocumentWithCustomId<CustomerData>('customers', 'CUST', customerData);
+
   return newCustomer;
 }
 

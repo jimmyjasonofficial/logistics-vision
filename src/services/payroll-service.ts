@@ -2,6 +2,7 @@
 'use server';
 
 import { ensureDbConnected } from '@/lib/firebase-admin';
+import { createDocumentWithCustomId } from './firestore-service';
 
 export type EmployeePayrollData = {
   employeeId: string;
@@ -26,9 +27,14 @@ export type PayrollRunData = Omit<PayrollRun, 'id'>;
 
 export async function createPayrollRun(data: PayrollRunData): Promise<PayrollRun> {
   const db = ensureDbConnected();
-  const docRef = db.collection('payrollRuns').doc();
-  const newRun: PayrollRun = { id: docRef.id, ...data };
-  await docRef.set(newRun);
+  // const docRef = db.collection('payrollRuns').doc();
+  // const newRun: PayrollRun = { id: docRef.id, ...data };
+  // await docRef.set(newRun);
+
+  
+  const newRun = await createDocumentWithCustomId<PayrollRunData>('payrollRuns', 'PR', data);
+
+
   return newRun;
 }
 

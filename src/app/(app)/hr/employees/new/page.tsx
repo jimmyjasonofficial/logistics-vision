@@ -1,4 +1,5 @@
 "use client";
+export const dynamic = 'force-dynamic';
 
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -153,9 +154,7 @@ export default function NewEmployeePage() {
         data.license_file = downloadUrl;
       }
       if (data.profile_image instanceof File) {
-        const uniquePath = `employees/profile/${Date.now()}_${
-          data.profile_image.name
-        }`;
+        const uniquePath = `employees/profile/${Date.now()}_${data.profile_image.name}`;
         const { gsPath } = await uploadFile(data.profile_image, uniquePath);
         const downloadUrl = await getDownloadUrl(gsPath);
         if (!downloadUrl)

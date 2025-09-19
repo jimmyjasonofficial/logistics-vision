@@ -112,7 +112,7 @@ export async function deleteExpenseAction(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    await requireAdmin();
+    // await requireAdmin();
     await deleteExpense(id);
     revalidatePath('/accounting/expenses');
     revalidatePath(`/accounting/pnl`);

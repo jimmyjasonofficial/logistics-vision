@@ -2,6 +2,7 @@
 'use server';
 
 import { ensureDbConnected } from '@/lib/firebase-admin';
+import { createDocumentWithCustomId } from './firestore-service';
 
 export type Vehicle = {
   id: string;
@@ -19,12 +20,15 @@ export type VehicleData = Omit<Vehicle, 'id'>;
 
 export async function createVehicle(vehicleData: VehicleData): Promise<Vehicle> {
   const db = ensureDbConnected();
-  const docRef = db.collection('vehicles').doc();
-  const newVehicle = {
-      id: docRef.id,
-      ...vehicleData,
-  };
-  await docRef.set(newVehicle);
+  // const docRef = db.collection('vehicles').doc();
+  // const newVehicle = {
+  //     id: docRef.id,
+  //     ...vehicleData,
+  // };
+  // await docRef.set(newVehicle);
+  
+  const newVehicle = await createDocumentWithCustomId<VehicleData>('vehicles', 'VEH', vehicleData);
+
   return newVehicle;
 }
 

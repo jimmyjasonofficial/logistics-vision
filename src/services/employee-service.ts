@@ -3,41 +3,47 @@
 
 import { ensureDbConnected } from '@/lib/firebase-admin';
 
+
+import { createDocumentWithCustomId } from '../services/firestore-service';
+
 export type Employee = {
   id: string;
-  name: string;
-  email: string;
-  phone: string;
+  name: string | 'Unknown';
+  email: string | 'unknown@example.com';
+  phone: string | 'N/A';
   license?: string;
   license_file?: string;
   licenseExpiry?: string;
   status: 'Active' | 'On Leave' | 'Inactive';
   profile_image: string | undefined;
-  totalTrips: number;
+  totalTrips: number | 0;
   role: 'Driver' | 'Senior Driver' | 'Admin' | 'Operations' | 'Finance' | 'Assistance' | 'Dispatcher' | 'Mechanic' | 'Accountant' | 'HR Manager' | 'User';
   baseSalary?: number;
-  leaveAllowance?: number;
+  leaveAllowance?: number | 20;
 };
 
 export type EmployeeData = Omit<Employee, 'id'>;
 
-export async function createEmployee(employeeData: Partial<Omit<EmployeeData, 'id' | 'totalTrips' | 'photoUrl'>>): Promise<Employee> {
+export async function createEmployee(employeeData: EmployeeData): Promise<Employee> {
   const db = ensureDbConnected();
-  const collectionRef = db.collection('employees');
-  const docRef = collectionRef.doc();
-  const newEmployee: Employee = {
-      id: docRef.id,
-      totalTrips: 0,
-      profile_image: employeeData?.profile_image,
-      name: employeeData.name || 'Unknown',
-      email: employeeData.email || 'unknown@example.com',
-      phone: employeeData.phone || 'N/A',
-      status: employeeData.status || 'Active',
-      leaveAllowance: employeeData.leaveAllowance || 20,
-      ...employeeData,
-      role: employeeData.role || 'User',
-  };
-  await docRef.set(newEmployee);
+  // const collectionRef = db.collection('employees');
+  // const docRef = collectionRef.doc();
+  // const newEmployee: Employee = {
+  //     id: docRef.id,
+  //     totalTrips: 0,
+  //     profile_image: employeeData?.profile_image,
+  //     name: employeeData.name || 'Unknown',
+  //     email: employeeData.email || 'unknown@example.com',
+  //     phone: employeeData.phone || 'N/A',
+  //     status: employeeData.status || 'Active',
+  //     leaveAllowance: employeeData.leaveAllowance || 20,
+  //     ...employeeData,
+  //     role: employeeData.role || 'User',
+  // };
+  // await docRef.set(newEmployee);
+
+  const newEmployee = await createDocumentWithCustomId<EmployeeData>('employees', 'EMP', employeeData);
+
   return newEmployee;
 }
 

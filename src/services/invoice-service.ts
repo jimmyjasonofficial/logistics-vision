@@ -3,6 +3,7 @@
 
 import { ensureDbConnected } from '@/lib/firebase-admin';
 import { getDownloadUrl } from './storage-service';
+import { createDocumentWithCustomId } from './firestore-service';
 
 export type LineItem = {
   item?: string;
@@ -28,7 +29,7 @@ export type Invoice = {
   subtotal: number;
   totalTax: number;
   total: number;
-  hasAttachment?: boolean;
+  hasAttachment?: boolean | false;
   attachmentPath?: string;
 };
 
@@ -38,15 +39,18 @@ export type InvoiceWithUrl = Invoice & {
 
 export type InvoiceData = Omit<Invoice, 'id'>;
 
-export async function createInvoice(invoiceData: Partial<InvoiceData>): Promise<Invoice> {
+export async function createInvoice(invoiceData: InvoiceData): Promise<Invoice> {
   const db = ensureDbConnected();
-  const docRef = db.collection('invoices').doc();
-  const newInvoice: Invoice = {
-      id: docRef.id,
-      hasAttachment: false,
-      ...invoiceData,
-  } as Invoice;
-  await docRef.set(newInvoice);
+  // const docRef = db.collection('invoices').doc();
+  // const newInvoice: Invoice = {
+  //     id: docRef.id,
+  //     hasAttachment: false,
+  //     ...invoiceData,
+  // } as Invoice;
+  // await docRef.set(newInvoice);
+
+  const newInvoice = await createDocumentWithCustomId<InvoiceData>('invoices', 'INV', invoiceData);
+
   return newInvoice;
 }
 
