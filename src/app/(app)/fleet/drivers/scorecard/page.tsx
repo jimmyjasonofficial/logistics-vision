@@ -42,7 +42,7 @@ export default async function DriverScorecardPage() {
         const totalLiters = driverFuelLogs.reduce((sum, log) => sum + log.liters, 0);
         const avgKmL = totalLiters > 0 ? totalKmDriven / totalLiters : 0;
 
-        return { id: driver.id, name: driver.name, photoUrl: driver.photoUrl, totalRevenue, avgKmL };
+        return { id: driver.id, name: driver.name, photoUrl: driver.profile_image, totalRevenue, avgKmL };
     });
 
     const maxRevenue = Math.max(...driverStats.map(d => d.totalRevenue), 1);

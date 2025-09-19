@@ -5,6 +5,7 @@ import { getCustomers } from '@/services/customer-service';
 import { getTrips } from '@/services/trip-service';
 import { getInvoices } from '@/services/invoice-service';
 import { getExpenses } from '@/services/expense-service';
+import { unstable_noStore } from 'next/cache';
 
 export type SearchResult = {
   type: 'Customer' | 'Trip' | 'Invoice' | 'Expense' | 'Page';
@@ -39,6 +40,7 @@ const searchablePages: (Omit<SearchResult, 'description'> & {description: string
 ];
 
 export async function searchAction(query: string): Promise<SearchResult[]> {
+  unstable_noStore(); // <-- important
   const lowerCaseQuery = query.toLowerCase();
   
   const [customers, trips, invoices, expenses] = await Promise.all([
