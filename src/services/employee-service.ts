@@ -5,6 +5,7 @@ import { ensureDbConnected } from '@/lib/firebase-admin';
 
 
 import { createDocumentWithCustomId } from '../services/firestore-service';
+import { unstable_noStore } from 'next/cache';
 
 export type Employee = {
   id: string;
@@ -58,6 +59,7 @@ type GetEmployeesOptions = {
 }
 
 export async function getEmployees(options: GetEmployeesOptions = {}): Promise<Employee[]> {
+  unstable_noStore();
   try {
     const db = ensureDbConnected();
     let query: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> = db.collection('employees');

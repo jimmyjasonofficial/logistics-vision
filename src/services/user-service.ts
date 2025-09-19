@@ -3,6 +3,7 @@
 
 import { auth, db, initializationError, ensureDbConnected } from '@/lib/firebase-admin';
 import type { UserRecord } from 'firebase-admin/auth';
+import { unstable_noStore } from 'next/cache';
 
 export type AppUser = {
   uid: string;
@@ -29,6 +30,8 @@ async function listAllUsers(nextPageToken?: string): Promise<UserRecord[]> {
 }
 
 export async function getUsers(): Promise<AppUser[]> {
+  unstable_noStore();
+
   try {
     const db = ensureDbConnected();
     if (!auth) {

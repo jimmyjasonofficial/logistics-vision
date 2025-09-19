@@ -4,6 +4,7 @@
 import { ensureDbConnected } from '@/lib/firebase-admin';
 import { getDownloadUrl } from './storage-service';
 import { createDocumentWithCustomId } from '../services/firestore-service';
+import { unstable_noStore } from 'next/cache';
 
 export type Expense = {
   id: string;
@@ -53,6 +54,7 @@ export async function deleteExpense(id: string): Promise<void> {
 }
 
 export async function getExpenses(options: { startDate?: string, endDate?: string, tripId?: string } = {}): Promise<Expense[]> {
+  unstable_noStore();
   try {
     const db = ensureDbConnected();
     let query: FirebaseFirestore.Query = db.collection('expenses');

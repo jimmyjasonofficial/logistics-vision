@@ -3,6 +3,7 @@
 
 import { ensureDbConnected } from '@/lib/firebase-admin';
 import { createDocumentWithCustomId } from '../services/firestore-service';
+import { unstable_noStore } from 'next/cache';
 
 export type Trip = {
   id: string;
@@ -45,6 +46,9 @@ export async function updateTrip(id: string, tripData: Partial<TripData>): Promi
 }
 
 export async function getTrips(options: { startDate?: string, endDate?: string, customerId?: string } = {}): Promise<Trip[]> {
+
+  unstable_noStore();
+
   try {
     const db = ensureDbConnected();
     let query: FirebaseFirestore.Query = db.collection('trips');

@@ -2,6 +2,7 @@
 'use server';
 
 import { ensureDbConnected } from '@/lib/firebase-admin';
+import { unstable_noStore } from 'next/cache';
 
 export type LeaveRequest = {
   id: string;
@@ -35,6 +36,8 @@ export async function updateLeaveRequestStatus(id: string, status: LeaveRequest[
 
 
 export async function getLeaveRequests(options: { status?: LeaveRequest['status'] } = {}): Promise<LeaveRequest[]> {
+
+unstable_noStore();
   try {
     const db = ensureDbConnected();
     let query: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> = db.collection('leaveRequests');

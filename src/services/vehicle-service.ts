@@ -3,6 +3,7 @@
 
 import { ensureDbConnected } from '@/lib/firebase-admin';
 import { createDocumentWithCustomId } from './firestore-service';
+import { unstable_noStore } from 'next/cache';
 
 export type Vehicle = {
   id: string;
@@ -39,6 +40,8 @@ export async function updateVehicle(id: string, vehicleData: VehicleData): Promi
 }
 
 export async function getVehicles(): Promise<Vehicle[]> {
+
+  unstable_noStore();
   try {
     const db = ensureDbConnected();
     const vehiclesSnapshot = await db.collection('vehicles').get();

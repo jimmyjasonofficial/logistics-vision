@@ -2,6 +2,7 @@
 'use server';
 
 import { ensureDbConnected } from '@/lib/firebase-admin';
+import { unstable_noStore } from 'next/cache';
 
 export type TaxRate = {
   name: string;
@@ -35,6 +36,8 @@ const defaultSettings: AppSettings = {
 };
 
 export async function getSettings(): Promise<AppSettings> {
+
+  unstable_noStore();
     try {
         const db = ensureDbConnected();
         const docRef = db.collection('settings').doc(SETTINGS_DOC_ID);

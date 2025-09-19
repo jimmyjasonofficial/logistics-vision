@@ -2,6 +2,7 @@
 'use server';
 
 import { ensureDbConnected } from '@/lib/firebase-admin';
+import { unstable_noStore as noStore } from "next/cache";
 
 import { createDocumentWithCustomId } from '../services/firestore-service';
 
@@ -39,6 +40,8 @@ export async function updateCustomer(id: string, customerData: Partial<CustomerD
 
 
 export async function getCustomers(): Promise<Customer[]> {
+  noStore();
+  
     try {
         const db = ensureDbConnected();
         const customersSnapshot = await db.collection('customers').get();

@@ -5,6 +5,7 @@ import { ensureDbConnected } from '@/lib/firebase-admin';
 import type { LineItem } from './invoice-service'; // Reuse line item type
 import { getDownloadUrl } from './storage-service';
 import { createDocumentWithCustomId } from './firestore-service';
+import { unstable_noStore } from 'next/cache';
 
 export type Quote = {
   id: string;
@@ -58,6 +59,9 @@ export async function deleteQuote(id: string): Promise<void> {
 }
 
 export async function getQuotes(): Promise<Quote[]> {
+  
+  unstable_noStore();
+
   try {
     const db = ensureDbConnected();
     const quotesSnapshot = await db.collection('quotes').orderBy('dateIssued', 'desc').get();

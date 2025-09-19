@@ -3,6 +3,7 @@
 
 import { ensureDbConnected } from '@/lib/firebase-admin';
 import { createDocumentWithCustomId } from './firestore-service';
+import { unstable_noStore } from 'next/cache';
 
 export type EmployeePayrollData = {
   employeeId: string;
@@ -51,6 +52,9 @@ export async function finalizePayrollRun(id: string): Promise<void> {
 }
 
 export async function getPayrollRuns(): Promise<PayrollRun[]> {
+
+  unstable_noStore();
+
   try {
     const db = ensureDbConnected();
     const snapshot = await db.collection('payrollRuns').orderBy('paymentDate', 'desc').get();

@@ -2,6 +2,7 @@
 'use server';
 
 import { ensureDbConnected } from '@/lib/firebase-admin';
+import { unstable_noStore } from 'next/cache';
 
 export type Commission = {
   id: string;
@@ -15,6 +16,8 @@ export type Commission = {
 export type CommissionData = Omit<Commission, 'id'>;
 
 export async function getCommissions(options: { status?: 'Paid' | 'Pending' } = {}): Promise<Commission[]> {
+  unstable_noStore();
+
   try {
     const db = ensureDbConnected();
     let query: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> = db.collection('commissions');

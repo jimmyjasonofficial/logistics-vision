@@ -3,6 +3,7 @@
 
 import { ensureDbConnected } from '@/lib/firebase-admin';
 import { createDocumentWithCustomId } from './firestore-service';
+import { unstable_noStore } from 'next/cache';
 
 export type Payout = {
   id: string;
@@ -28,6 +29,8 @@ export async function createPayout(data: PayoutData): Promise<Payout> {
 }
 
 export async function getPayouts(): Promise<Payout[]> {
+  unstable_noStore();
+
   try {
     const db = ensureDbConnected();
     const snapshot = await db.collection('payouts').orderBy('payoutDate', 'desc').get();

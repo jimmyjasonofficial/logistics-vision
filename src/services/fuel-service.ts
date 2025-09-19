@@ -2,6 +2,7 @@
 'use server';
 
 import { ensureDbConnected } from '@/lib/firebase-admin';
+import { unstable_noStore } from 'next/cache';
 
 export type FuelLog = {
   id: string;
@@ -29,6 +30,7 @@ export async function createFuelLog(data: FuelLogData): Promise<FuelLog> {
 }
 
 export async function getFuelLogs(): Promise<FuelLog[]> {
+  unstable_noStore();
   try {
     const db = ensureDbConnected();
     const snapshot = await db.collection('fuelLogs').orderBy('date', 'desc').get();

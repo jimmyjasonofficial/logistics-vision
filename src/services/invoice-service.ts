@@ -4,6 +4,7 @@
 import { ensureDbConnected } from '@/lib/firebase-admin';
 import { getDownloadUrl } from './storage-service';
 import { createDocumentWithCustomId } from './firestore-service';
+import { unstable_noStore } from 'next/cache';
 
 export type LineItem = {
   item?: string;
@@ -67,6 +68,7 @@ export async function deleteInvoice(id: string): Promise<void> {
 }
 
 export async function getInvoices(options: { startDate?: string, endDate?: string, customerId?: string } = {}): Promise<Invoice[]> {
+  unstable_noStore();
   try {
     const db = ensureDbConnected();
     let query: FirebaseFirestore.Query = db.collection('invoices');
