@@ -8,6 +8,7 @@ import {
     updatePayrollRun,
     finalizePayrollRun,
     type PayrollRunData,
+    deletePayroll,
 } from '@/services/payroll-service';
 import { revalidatePath } from 'next/cache';
 
@@ -82,4 +83,22 @@ export async function finalizePayrollRunAction(id: string): Promise<{ success: b
         }
         return { success: false, error: errorMessage };
     }
+}
+
+export async function deletePayrollAction(
+  id: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    // await requireAdmin();
+    await deletePayroll(id);
+        revalidatePath('/hr/payroll');
+
+    return { success: true };
+  } catch (e: any) {
+    let errorMessage = e.message || 'An unknown error occurred.';
+    if (String(e.message).includes('Firestore is not initialized')) {
+      errorMessage = "A connection to the database could not be established. Please contact support if the issue persists.";
+    }
+    return { success: false, error: errorMessage };
+  }
 }

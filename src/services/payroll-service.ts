@@ -77,3 +77,9 @@ export async function getPayrollRunById(id: string): Promise<PayrollRun | null> 
     return null;
   }
 }
+
+export async function deletePayroll(id: string ): Promise<void> {
+  const db = ensureDbConnected();
+  const docRef = db.collection("payrollRuns").doc(id);
+  await docRef.delete();
+}

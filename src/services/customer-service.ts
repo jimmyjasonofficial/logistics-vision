@@ -72,3 +72,9 @@ export async function getCustomerById(id: string): Promise<Customer | null> {
     return null;
   }
 }
+
+export async function deleteCustomer(id: string ): Promise<void> {
+  const db = ensureDbConnected();
+  const docRef = db.collection("customers").doc(id);
+  await docRef.delete();
+}

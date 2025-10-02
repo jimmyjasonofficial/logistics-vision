@@ -102,3 +102,14 @@ export async function getEmployeeById(id: string): Promise<Employee | null> {
      return null;
   }
 }
+export async function deleteDriver(id: string): Promise<void> {
+  try {
+    const db = ensureDbConnected();
+    const docRef = db.collection("employees").doc(id);
+    await docRef.delete();
+    console.log(`Driver with id ${id} deleted successfully.`);
+  } catch (error) {
+    console.error(`Error deleting driver with id ${id}:`, error);
+    throw error;
+  }
+}

@@ -72,3 +72,8 @@ export async function getVehicleById(id: string): Promise<Vehicle | null> {
     return null;
   }
 }
+export async function deleteVehicle(id: string ): Promise<void> {
+  const db = ensureDbConnected();
+  const docRef = db.collection("vehicles").doc(id);
+  await docRef.delete();
+}

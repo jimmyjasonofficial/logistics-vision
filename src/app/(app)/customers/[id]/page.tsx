@@ -47,9 +47,8 @@ export default async function CustomerDetailsPage({ params }: { params: { id: st
   const allInvoices = await getInvoices();
   const allTrips = await getTrips();
 
-  const customerTrips = allTrips.filter(trip => trip.customer === customer.company);
+  const customerTrips = allTrips.filter(trip => trip.customer === customer.name);
   const customerInvoices = allInvoices.filter(invoice => invoice.customer === customer.company);
-
   const lifetimeValue = customerInvoices
     .filter(inv => inv.status === 'Paid')
     .reduce((sum, inv) => sum + inv.total, 0);

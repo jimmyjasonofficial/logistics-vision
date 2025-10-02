@@ -89,6 +89,8 @@ export function NewTripForm({
   });
 
   const distance = form.watch("distance");
+  const data = form.watch();
+  console.log(data)
 
   useEffect(() => {
     const dist = Number(distance);
@@ -123,7 +125,7 @@ export function NewTripForm({
       customer: customer?.name || "Unknown Customer",
       driver: driver?.name || "Unknown Driver",
       truck: vehicle?.licensePlate || "Unknown Vehicle",
-      notes: data.notes ?? "", // fix type issue
+      notes: data.notes ?? "",
     };
 
     const result = await createTripAction(tripData);
@@ -365,7 +367,7 @@ export function NewTripForm({
                         placeholder="0.00"
                         {...field}
                         disabled={loading}
-                        readOnly={true}
+                        // readOnly={true}
                       />
                     </FormControl>
                     <FormMessage />

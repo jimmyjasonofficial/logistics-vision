@@ -1,5 +1,5 @@
 "use client";
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,6 +21,11 @@ import {
 import { Download, MoreHorizontal } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { Employee } from "@/services/employee-service";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+import { deleteDriverAction } from "./actions";
+import { DeleteMenuItem } from "@/components/ui/DeleteButton";
 
 const getStatusVariant = (status: string) => {
   switch (status) {
@@ -36,6 +41,32 @@ const getStatusVariant = (status: string) => {
 };
 
 export function DriverList({ drivers }: { drivers: Employee[] }) {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  async function handleDelete(id: string) {
+    setLoading(true);
+    const result = await deleteDriverAction(id);
+    setLoading(false);
+
+    if (result.success) {
+      toast({
+        title: "Driver Deleted",
+        description: `The Driver has been successfully deleted.`,
+      });
+      setOpen(false);
+      router.refresh();
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Error Deleting Driver",
+        description: result.error,
+      });
+    }
+  }
+
   if (drivers.length === 0) {
     return (
       <div className="text-center text-muted-foreground p-8">
@@ -128,6 +159,13 @@ export function DriverList({ drivers }: { drivers: Employee[] }) {
                     <Link href={`/hr/employees/edit/${driver.id}`}>Edit</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem>Assign to Trip</DropdownMenuItem>
+                  <DeleteMenuItem
+                    name={"Driver"}
+                    handleDelete={() => handleDelete(driver?.id)}
+                    setOpen={setOpen}
+                    loading={loading}
+                    open={open}
+                  />
                 </DropdownMenuContent>
               </DropdownMenu>
             </TableCell>

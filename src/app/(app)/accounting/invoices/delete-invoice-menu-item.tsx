@@ -36,7 +36,7 @@ export function DeleteInvoiceMenuItem({ invoiceId }: { invoiceId: string }) {
         description: `The invoice has been successfully deleted.`,
       });
       setOpen(false);
-      router.refresh(); // Refresh the list
+      router.refresh(); 
     } else {
       toast({
         variant: 'destructive',

@@ -11,10 +11,23 @@ import {
 import { ArrowLeft, UserPlus } from 'lucide-react';
 import { getDrivers } from '@/services/employee-service';
 import { DriverList } from './driver-list';
+import { getTrips } from '@/services/trip-service';
 
 export default async function DriversPage() {
   const drivers = await getDrivers();
+  const allTrips = await getTrips();
 
+
+const driversWithTrips = drivers.map((driver) => {
+    const tripCount = allTrips.filter(
+      (trip) => trip.driverId === driver?.id
+    ).length;
+
+    return {
+      ...driver,
+      totalTrips: tripCount,
+    };
+  });
   return (
     <div className="flex-1 space-y-8">
        <div className="flex items-center justify-between">
@@ -43,7 +56,7 @@ export default async function DriversPage() {
           <CardDescription>A list of all drivers in your fleet, loaded from Firestore.</CardDescription>
         </CardHeader>
         <CardContent>
-          <DriverList drivers={drivers} />
+       <DriverList drivers={driversWithTrips} />
         </CardContent>
       </Card>
     </div>

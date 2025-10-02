@@ -1,6 +1,6 @@
 "use client";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +22,11 @@ import {
 import { Download, MoreHorizontal } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { Employee } from "@/services/employee-service";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+import { DeleteMenuItem } from "@/components/ui/DeleteButton";
+import { deleteDriverAction } from "../../fleet/drivers/actions";
 
 const getStatusVariant = (status: string) => {
   switch (status) {
@@ -37,6 +42,32 @@ const getStatusVariant = (status: string) => {
 };
 
 export function EmployeeList({ employees }: { employees: Employee[] }) {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  async function handleDelete(id: string) {
+    setLoading(true);
+    const result = await deleteDriverAction(id);
+    setLoading(false);
+
+    if (result.success) {
+      toast({
+        title: "Employee Deleted",
+        description: `The Employee has been successfully deleted.`,
+      });
+      setOpen(false);
+      router.refresh();
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Error Deleting Employee",
+        description: result.error,
+      });
+    }
+  }
+
   if (employees.length === 0) {
     return (
       <div className="text-center text-muted-foreground p-8">
@@ -65,7 +96,10 @@ export function EmployeeList({ employees }: { employees: Employee[] }) {
             <TableCell className="font-medium">
               <div className="flex items-center gap-3">
                 <Avatar className="h-9 w-9">
-                  <AvatarImage src={employee.profile_image} alt={employee.name} />
+                  <AvatarImage
+                    src={employee.profile_image}
+                    alt={employee.name}
+                  />
                   <AvatarFallback>{employee.name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div>
@@ -129,6 +163,13 @@ export function EmployeeList({ employees }: { employees: Employee[] }) {
                   <DropdownMenuItem asChild>
                     <Link href={`/hr/employees/edit/${employee.id}`}>Edit</Link>
                   </DropdownMenuItem>
+                  <DeleteMenuItem
+                    name={"Employee"}
+                    handleDelete={() => handleDelete(employee?.id)}
+                    setOpen={setOpen}
+                    loading={loading}
+                    open={open}
+                  />
                 </DropdownMenuContent>
               </DropdownMenu>
             </TableCell>

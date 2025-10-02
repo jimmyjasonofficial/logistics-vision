@@ -1,5 +1,5 @@
 "use client";
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -95,17 +95,21 @@ export function EditTripForm({
     },
   });
 
-  const distance = form.watch("distance");
+const [isDistanceEdited, setIsDistanceEdited] = useState(false);
+const distance = form.watch("distance");
 
-  useEffect(() => {
-    if (typeof distance === "number" && distance >= 0) {
-      const calculatedRevenue = distance * LOAD_RATE_PER_KM;
-      form.setValue("revenue", parseFloat(calculatedRevenue.toFixed(2)), {
-        shouldValidate: true,
-      });
-    }
-  }, [distance, form]);
+useEffect(() => {
+  const dist = Number(distance);
+  if (isDistanceEdited && !Number.isNaN(dist) && dist >= 0) {
+    const calculatedRevenue = dist * LOAD_RATE_PER_KM;
+    form.setValue("revenue", parseFloat(calculatedRevenue.toFixed(2)), {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+  }
+}, [distance, isDistanceEdited, form]);
 
+console.log(form.watch())
   async function onSubmit(data: TripFormValues) {
     setLoading(true);
 
@@ -370,24 +374,31 @@ export function EditTripForm({
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <FormField
-                control={form.control}
-                name="distance"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Distance (km)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="0"
-                        {...field}
-                        disabled={loading}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <FormField
+  control={form.control}
+  name="distance"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Distance (km)</FormLabel>
+      <FormControl>
+        <Input
+          type="number"
+          placeholder="0"
+          value={field.value ?? ""}
+          onChange={(e) => {
+            const raw = e.target.value;
+            setIsDistanceEdited(true);
+            field.onChange(raw === "" ? "" : Number(raw));
+          }}
+          onBlur={field.onBlur}
+          disabled={loading}
+        />
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
               <FormField
                 control={form.control}
                 name="revenue"
@@ -400,7 +411,7 @@ export function EditTripForm({
                         placeholder="0.00"
                         {...field}
                         disabled={loading}
-                        readOnly
+                        // readOnly
                       />
                     </FormControl>
                     <FormMessage />

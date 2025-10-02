@@ -57,3 +57,8 @@ unstable_noStore();
     return [];
   }
 }
+export async function deleteLeave(id: string ): Promise<void> {
+  const db = ensureDbConnected();
+  const docRef = db.collection("leaveRequests").doc(id);
+  await docRef.delete();
+}
