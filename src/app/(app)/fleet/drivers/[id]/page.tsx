@@ -8,6 +8,7 @@ import { notFound } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { getEmployeeById } from '@/services/employee-service';
+import { getTrips } from '@/services/trip-service';
 
 const getStatusVariant = (status: string) => {
     switch (status) {
@@ -26,6 +27,9 @@ export default async function DriverDetailsPage({ params }: { params: { id: stri
   if (!employee) {
       notFound();
   }
+  const allTrips = await getTrips();
+  const driverTrips = allTrips.filter(trip => trip.driverId === employee.id).length;
+
 
   return (
     <div className="flex-1 space-y-8">
@@ -75,7 +79,7 @@ export default async function DriverDetailsPage({ params }: { params: { id: stri
             </div>
              <div className="space-y-1">
                 <p className="text-sm font-medium text-muted-foreground flex items-center gap-2"><Truck className="h-4 w-4" /> Total Trips</p>
-                <p className="pl-6">{employee.totalTrips}</p>
+                <p className="pl-6">{driverTrips}</p>
             </div>
             <div className="space-y-1">
                 <p className="text-sm font-medium text-muted-foreground flex items-center gap-2"><Mail className="h-4 w-4" /> Email Address</p>
