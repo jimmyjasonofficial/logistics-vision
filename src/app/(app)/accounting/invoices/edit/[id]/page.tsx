@@ -454,7 +454,7 @@ export default function EditInvoicePage() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setShowTripModal(true)}
+                  // onClick={() => setShowTripModal(true)}
                 >
                   + Add Trips
                 </Button>
