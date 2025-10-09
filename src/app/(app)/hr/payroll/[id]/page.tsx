@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -140,7 +140,10 @@ export default function EditPayrollRunPage() {
     name: "employees",
   });
 
-  const watchEmployees = form.watch("employees");
+  const watchEmployees = useWatch({
+    control: form.control,
+    name: "employees",
+  });
   const [totals, setTotals] = useState({
     gross: 0,
     taxes: 0,
@@ -154,18 +157,40 @@ export default function EditPayrollRunPage() {
   >({});
   const [searchTerm, setSearchTerm] = useState("");
 
+  // useEffect(() => {
+  //   if (!watchEmployees) return;
+  //   const newTotals = watchEmployees.reduce(
+  //     (acc, emp) => {
+  //       const gross =
+  //         (emp.basePay || 0) + (emp.overtime || 0) + (emp.bonus || 0);
+  //       const totalDeductions = (emp.taxes || 0) + (emp.deductions || 0);
+  //       const net = gross - totalDeductions;
+
+  //       acc.gross += gross;
+  //       acc.taxes += emp.taxes || 0;
+  //       acc.deductions += emp.deductions || 0;
+  //       acc.net += net;
+
+  //       return acc;
+  //     },
+  //     { gross: 0, taxes: 0, deductions: 0, net: 0 }
+  //   );
+
+  //   setTotals(newTotals);
+  // }, [watchEmployees]);
   useEffect(() => {
     if (!watchEmployees) return;
+
     const newTotals = watchEmployees.reduce(
       (acc, emp) => {
         const gross =
-          (emp.basePay || 0) + (emp.overtime || 0) + (emp.bonus || 0);
-        const totalDeductions = (emp.taxes || 0) + (emp.deductions || 0);
+          (emp?.basePay || 0) + (emp?.overtime || 0) + (emp?.bonus || 0);
+        const totalDeductions = (emp?.taxes || 0) + (emp?.deductions || 0);
         const net = gross - totalDeductions;
 
         acc.gross += gross;
-        acc.taxes += emp.taxes || 0;
-        acc.deductions += emp.deductions || 0;
+        acc.taxes += emp?.taxes || 0;
+        acc.deductions += emp?.deductions || 0;
         acc.net += net;
 
         return acc;
@@ -175,7 +200,6 @@ export default function EditPayrollRunPage() {
 
     setTotals(newTotals);
   }, [watchEmployees]);
-
   const availableEmployees = allEmployees.filter(
     (emp) => !fields.some((f) => f.employeeId === emp.id)
   );
@@ -399,17 +423,27 @@ export default function EditPayrollRunPage() {
               </TableHeader>
               <TableBody>
                 {fields.map((field, index) => {
+                  // const employee = watchEmployees[index];
+                  // const grossPay =
+                  //   parseFloat(employee.basePay as any) ||
+                  //   0 + parseFloat(employee.overtime as any) ||
+                  //   0 + parseFloat(employee.bonus as any) ||
+                  //   0;
+
+                  // const netPay =
+                  //   grossPay -
+                  //   (employee.taxes || 0) -
+                  //   (employee.deductions || 0);
                   const employee = watchEmployees[index];
                   const grossPay =
-                    parseFloat(employee.basePay as any) ||
-                    0 + parseFloat(employee.overtime as any) ||
-                    0 + parseFloat(employee.bonus as any) ||
-                    0;
+                    Number(employee?.basePay || 0) +
+                    Number(employee?.overtime || 0) +
+                    Number(employee?.bonus || 0);
 
                   const netPay =
                     grossPay -
-                    (employee.taxes || 0) -
-                    (employee.deductions || 0);
+                    Number(employee?.taxes || 0) -
+                    Number(employee?.deductions || 0);
 
                   return (
                     <TableRow key={field.id}>
@@ -425,7 +459,10 @@ export default function EditPayrollRunPage() {
                               <FormControl>
                                 <Input
                                   type="number"
-                                  {...field}
+                                  value={field.value ?? ""}
+                                  onChange={(e) =>
+                                    field.onChange(Number(e.target.value) || 0)
+                                  }
                                   className="w-28"
                                   readOnly={isReadOnly}
                                 />
@@ -443,7 +480,10 @@ export default function EditPayrollRunPage() {
                               <FormControl>
                                 <Input
                                   type="number"
-                                  {...field}
+                                  value={field.value ?? ""}
+                                  onChange={(e) =>
+                                    field.onChange(Number(e.target.value) || 0)
+                                  }
                                   className="w-24"
                                   readOnly={isReadOnly}
                                 />
@@ -461,7 +501,10 @@ export default function EditPayrollRunPage() {
                               <FormControl>
                                 <Input
                                   type="number"
-                                  {...field}
+                                  value={field.value ?? ""}
+                                  onChange={(e) =>
+                                    field.onChange(Number(e.target.value) || 0)
+                                  }
                                   className="w-24"
                                   readOnly={isReadOnly}
                                 />
