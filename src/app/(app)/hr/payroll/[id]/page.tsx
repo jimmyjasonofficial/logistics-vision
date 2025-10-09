@@ -525,7 +525,10 @@ export default function EditPayrollRunPage() {
                               <FormControl>
                                 <Input
                                   type="number"
-                                  {...field}
+                               value={field.value ?? ""}
+                                  onChange={(e) =>
+                                    field.onChange(Number(e.target.value) || 0)
+                                  }
                                   className="w-24"
                                   readOnly={isReadOnly}
                                 />
@@ -543,7 +546,10 @@ export default function EditPayrollRunPage() {
                               <FormControl>
                                 <Input
                                   type="number"
-                                  {...field}
+                                 value={field.value ?? ""}
+                                  onChange={(e) =>
+                                    field.onChange(Number(e.target.value) || 0)
+                                  }
                                   className="w-24"
                                   readOnly={isReadOnly}
                                 />

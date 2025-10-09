@@ -389,7 +389,10 @@ export default function NewPayrollRunPage() {
                               <FormControl>
                                 <Input
                                   type="number"
-                                  {...field}
+                                   value={field.value ?? ""}
+                                  onChange={(e) =>
+                                    field.onChange(Number(e.target.value) || 0)
+                                  }
                                   className="w-24"
                                 />
                               </FormControl>
@@ -406,7 +409,10 @@ export default function NewPayrollRunPage() {
                               <FormControl>
                                 <Input
                                   type="number"
-                                  {...field}
+                                      value={field.value ?? ""}
+                                  onChange={(e) =>
+                                    field.onChange(Number(e.target.value) || 0)
+                                  }
                                   className="w-24"
                                 />
                               </FormControl>
