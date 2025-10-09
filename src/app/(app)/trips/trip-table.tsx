@@ -26,9 +26,11 @@ import { useState } from "react";
 import { deleteTripAction } from "./actions";
 import { DeleteMenuItem } from "@/components/ui/DeleteButton";
 
-type TripTableProps = {
-  trips: Trip[];
-};
+interface TripTableProps {
+  trips: Trip[]; // Trip list
+  selectedTrips: string[];
+  setSelectedTrips: React.Dispatch<React.SetStateAction<string[]>>;
+}
 
 const getStatusVariant = (status: Trip["status"]) => {
   switch (status) {
@@ -47,13 +49,31 @@ const getStatusVariant = (status: Trip["status"]) => {
   }
 };
 
-export function TripTable({ trips }: TripTableProps) {
+export function TripTable({
+  trips,
+  selectedTrips,
+  setSelectedTrips,
+}: TripTableProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+
+  const toggleTrip = (id: string) => {
+    setSelectedTrips((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const toggleAll = () => {
+    if (selectedTrips.length === trips.length) {
+      setSelectedTrips([]);
+    } else {
+      setSelectedTrips(trips.map((t) => t.id));
+    }
+  };
   const [open, setOpen] = useState(false);
 
-  async function handleDelete(id: string ) {
+  async function handleDelete(id: string) {
     setLoading(true);
     const result = await deleteTripAction(id);
     setLoading(false);
@@ -83,112 +103,132 @@ export function TripTable({ trips }: TripTableProps) {
   }
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Trip ID</TableHead>
-          <TableHead className="hidden sm:table-cell">Customer</TableHead>
-          <TableHead className="hidden lg:table-cell">Route</TableHead>
-          <TableHead className="hidden md:table-cell">Driver</TableHead>
-          <TableHead>Truck</TableHead>
-          <TableHead className="hidden lg:table-cell text-right">
-            Revenue
-          </TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>
-            <span className="sr-only">Actions</span>
-          </TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {trips.map((trip) => {
-          const isCancellable =
-            trip.status !== "Delivered" && trip.status !== "Cancelled";
-          return (
-            <TableRow key={trip.id}>
-              <TableCell className="font-medium">
-                <Link
-                  href={`/trips/${trip.id}`}
-                  className="text-primary hover:underline"
-                >
-                  {trip.id}
-                </Link>
-              </TableCell>
-              <TableCell className="hidden sm:table-cell">
-                <Link
-                  href={`/customers/${trip.customerId}`}
-                  className="text-primary hover:underline"
-                >
-                  {trip.customer}
-                </Link>
-              </TableCell>
-              <TableCell className="hidden lg:table-cell">
-                {trip.origin} to {trip.destination}
-              </TableCell>
-              <TableCell className="hidden md:table-cell">
-                <Link
-                  href={`/fleet/drivers/${trip.driverId}`}
-                  className="text-primary hover:underline"
-                >
-                  {trip.driver}
-                </Link>
-              </TableCell>
-              <TableCell>{trip.truck}</TableCell>
-              <TableCell className="hidden lg:table-cell text-right">
-                ${trip.revenue.toLocaleString()}
-              </TableCell>
-              <TableCell>
-                <Badge
-                  variant={
-                    getStatusVariant(trip.status) as
-                      | "default"
-                      | "secondary"
-                      | "outline"
-                      | "destructive"
-                  }
-                >
-                  {trip.status}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button aria-haspopup="true" size="icon" variant="ghost">
-                      <MoreHorizontal className="h-4 w-4" />
-                      <span className="sr-only">Toggle menu</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                    <DropdownMenuItem asChild>
-                      <Link href={`/trips/${trip.id}`}>View Details</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href={`/trips/edit/${trip.id}`}>Edit Trip</Link>
-                    </DropdownMenuItem>
-                    <CompleteTripMenuItem
-                      tripId={trip.id}
-                      tripStatus={trip.status}
-                    />
-                    {isCancellable ? (
-                      <CancelTripMenuItem tripId={trip.id} />
-                    ) : (
-                      <DropdownMenuItem disabled>Cancel Trip</DropdownMenuItem>
-                    )}
-                    <DeleteMenuItem
-                      name={"Trip"}
-                      handleDelete={() => handleDelete(trip?.id)}
-                      setOpen={setOpen}
-                      loading={loading}
-                      open={open}
-                    />
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
-          );
-        })}
-      </TableBody>
-    </Table>
+    <>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>
+              <input
+                type="checkbox"
+                checked={selectedTrips.length === trips.length}
+                onChange={toggleAll}
+                className="h-4 w-4 cursor-pointer rounded-lg border-gray-300 accent-[#ff5900] checked:bg-[#ff5900] checked:text-white checked:border-[#ff5900]"
+              />
+            </TableHead>
+            <TableHead>Trip ID</TableHead>
+            <TableHead className="hidden sm:table-cell">Customer</TableHead>
+            <TableHead className="hidden lg:table-cell">Route</TableHead>
+            <TableHead className="hidden md:table-cell">Driver</TableHead>
+            <TableHead>Truck</TableHead>
+            <TableHead className="hidden lg:table-cell text-right">
+              Revenue
+            </TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>
+              <span className="sr-only">Actions</span>
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {trips.map((trip) => {
+            const isCancellable =
+              trip.status !== "Delivered" && trip.status !== "Cancelled";
+            return (
+              <TableRow key={trip.id}>
+                <TableCell>
+                  <input
+                    type="checkbox"
+                    checked={selectedTrips.includes(trip.id)}
+                    className="h-4 w-4 cursor-pointer rounded-lg border-gray-300 accent-[#ff5900] checked:bg-[#ff5900] checked:text-white checked:border-[#ff5900]"
+                    onChange={() => toggleTrip(trip.id)}
+                  />
+                </TableCell>
+                <TableCell className="font-medium">
+                  <Link
+                    href={`/trips/${trip.id}`}
+                    className="text-primary hover:underline"
+                  >
+                    {trip.id}
+                  </Link>
+                </TableCell>
+                <TableCell className="hidden sm:table-cell">
+                  <Link
+                    href={`/customers/${trip.customerId}`}
+                    className="text-primary hover:underline"
+                  >
+                    {trip.customer}
+                  </Link>
+                </TableCell>
+                <TableCell className="hidden lg:table-cell">
+                  {trip.origin} to {trip.destination}
+                </TableCell>
+                <TableCell className="hidden md:table-cell">
+                  <Link
+                    href={`/fleet/drivers/${trip.driverId}`}
+                    className="text-primary hover:underline"
+                  >
+                    {trip.driver}
+                  </Link>
+                </TableCell>
+                <TableCell>{trip.truck}</TableCell>
+                <TableCell className="hidden lg:table-cell text-right">
+                  ${trip.revenue.toLocaleString()}
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant={
+                      getStatusVariant(trip.status) as
+                        | "default"
+                        | "secondary"
+                        | "outline"
+                        | "destructive"
+                    }
+                  >
+                    {trip.status}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button aria-haspopup="true" size="icon" variant="ghost">
+                        <MoreHorizontal className="h-4 w-4" />
+                        <span className="sr-only">Toggle menu</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuItem asChild>
+                        <Link href={`/trips/${trip.id}`}>View Details</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href={`/trips/edit/${trip.id}`}>Edit Trip</Link>
+                      </DropdownMenuItem>
+                      <CompleteTripMenuItem
+                        tripId={trip.id}
+                        tripStatus={trip.status}
+                      />
+                      {isCancellable ? (
+                        <CancelTripMenuItem tripId={trip.id} />
+                      ) : (
+                        <DropdownMenuItem disabled>
+                          Cancel Trip
+                        </DropdownMenuItem>
+                      )}
+                      <DeleteMenuItem
+                        name={"Trip"}
+                        handleDelete={() => handleDelete(trip?.id)}
+                        setOpen={setOpen}
+                        loading={loading}
+                        open={open}
+                      />
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </>
   );
 }

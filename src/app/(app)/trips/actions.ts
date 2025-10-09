@@ -51,7 +51,6 @@ export async function cancelTripAction(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    // We could add more complex business logic here, e.g., check if trip is in a cancelable state.
     await updateTrip(id, { status: 'Cancelled' });
     revalidatePath('/trips');
     revalidatePath(`/trips/${id}`);

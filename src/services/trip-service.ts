@@ -11,10 +11,12 @@ export type Trip = {
   origin: string;
   destination: string;
   driver: string;
+  date: string;
   driverId: string;
   status: "Planned" | "In Transit" | "Delivered" | "Cancelled" | "Pending";
   pickupTime: string;
   estimatedDelivery: string;
+  data?: string;
   vehicleId: string;
   distance: number;
   revenue: number;
@@ -105,7 +107,7 @@ export async function getTripById(id: string): Promise<Trip | null> {
     return null;
   }
 }
-export async function deleteTrip(id: string ): Promise<void> {
+export async function deleteTrip(id: string): Promise<void> {
   const db = ensureDbConnected();
   const docRef = db.collection("trips").doc(id);
   await docRef.delete();

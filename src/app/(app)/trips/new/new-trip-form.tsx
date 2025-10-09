@@ -90,7 +90,6 @@ export function NewTripForm({
 
   const distance = form.watch("distance");
   const data = form.watch();
-  console.log(data)
 
   useEffect(() => {
     const dist = Number(distance);
@@ -114,6 +113,13 @@ export function NewTripForm({
   }, [searchParams, form]);
 
   async function onSubmit(data: TripFormValues) {
+    const today = new Date();
+    const localDate = new Date(
+      today.getTime() - today.getTimezoneOffset() * 60000
+    )
+      .toISOString()
+      .split("T")[0];
+
     setLoading(true);
 
     const customer = customers.find((c) => c.id === data.customerId);
@@ -126,6 +132,7 @@ export function NewTripForm({
       driver: driver?.name || "Unknown Driver",
       truck: vehicle?.licensePlate || "Unknown Vehicle",
       notes: data.notes ?? "",
+      date: localDate ?? "",
     };
 
     const result = await createTripAction(tripData);
@@ -282,7 +289,7 @@ export function NewTripForm({
                   </FormItem>
                 )}
               /> */}
-                 <FormField
+              <FormField
                 control={form.control}
                 name="destination"
                 render={({ field }) => (

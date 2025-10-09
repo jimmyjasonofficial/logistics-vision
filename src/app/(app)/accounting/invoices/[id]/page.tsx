@@ -9,6 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { getInvoiceById } from '@/services/invoice-service';
 import { MarkAsPaidButton } from '../mark-as-paid-button';
+import InvoiceActions from './InvoiceActions';
 
 const getStatusVariant = (status: string) => {
   switch (status) {
@@ -39,7 +40,7 @@ export default async function InvoiceDetailsPage({ params }: { params: { id: str
           </div>
         </div>
         <div className="flex items-center gap-2">
-            <Button variant="outline"><Printer className="mr-2 h-4 w-4" /> Print/Export</Button>
+            <InvoiceActions />
             <MarkAsPaidButton invoiceId={invoice.id} invoiceStatus={invoice.status} />
         </div>
       </div>

@@ -25,6 +25,7 @@ export type Invoice = {
   dueDate: string;
   status: 'Paid' | 'Unpaid' | 'Overdue' | 'Draft';
   reference?: string;
+  date?: string;
   taxType: 'exclusive' | 'inclusive' | 'no_tax';
   lineItems: LineItem[];
   subtotal: number;

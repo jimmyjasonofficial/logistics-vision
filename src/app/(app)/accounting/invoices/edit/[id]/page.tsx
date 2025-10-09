@@ -1,5 +1,5 @@
 "use client";
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
@@ -51,6 +51,8 @@ import { updateInvoiceAction } from "../../actions";
 import { getCustomers, type Customer } from "@/services/customer-service";
 import { useToast } from "@/hooks/use-toast";
 import { Combobox } from "@/components/ui/combobox";
+import { Trip } from "@/services/trip-service";
+import TripSelectorModal from "../../new/TripModal";
 
 const lineItemSchema = z.object({
   item: z.string().optional(),
@@ -83,7 +85,7 @@ export default function EditInvoicePage() {
   const params = useParams();
   const invoiceId = params.id as string;
   const { toast } = useToast();
-
+  const [showTripModal, setShowTripModal] = useState(false);
   const [invoice, setInvoice] = useState<InvoiceWithUrl | null>(null);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(false);
@@ -93,7 +95,57 @@ export default function EditInvoicePage() {
   const form = useForm<InvoiceFormValues>({
     resolver: zodResolver(invoiceFormSchema),
   });
+  const handleAddTrips = (selectedTrips: Trip[]) => {
+    const currentItems = form.getValues("lineItems") || [];
 
+    const isEmptyRow = (item: any) =>
+      !item.description &&
+      !item.item &&
+      (!item.unitPrice || item.unitPrice === 0);
+
+    const emptyRowIndex = currentItems.findIndex(isEmptyRow);
+
+    const existingTripIds = new Set(currentItems.map((i) => i.item));
+    const newTrips = selectedTrips.filter((t) => !existingTripIds.has(t.id));
+
+    if (emptyRowIndex !== -1 && newTrips.length > 0) {
+      const [firstTrip, ...restTrips] = newTrips;
+
+      form.setValue(`lineItems.${emptyRowIndex}`, {
+        item: firstTrip.id,
+        description: `${firstTrip.origin} → ${firstTrip.destination}`,
+        quantity: 1,
+        unitPrice: firstTrip.revenue || 0,
+        discount: 0,
+        account: "200 - Sales",
+        taxRate: "Tax on Sales (15%)",
+      });
+
+      restTrips.forEach((trip) => {
+        append({
+          item: trip.id,
+          description: `${trip.origin} → ${trip.destination}`,
+          quantity: 1,
+          unitPrice: trip.revenue || 0,
+          discount: 0,
+          account: "200 - Sales",
+          taxRate: "Tax on Sales (15%)",
+        });
+      });
+    } else {
+      newTrips.forEach((trip) => {
+        append({
+          item: trip.id,
+          description: `${trip.origin} → ${trip.destination}`,
+          quantity: 1,
+          unitPrice: trip.revenue || 0,
+          discount: 0,
+          account: "200 - Sales",
+          taxRate: "Tax on Sales (15%)",
+        });
+      });
+    }
+  };
   useEffect(() => {
     async function fetchInvoice() {
       if (!invoiceId) return;
@@ -127,10 +179,10 @@ export default function EditInvoicePage() {
   const [totalTax, setTotalTax] = useState(0);
   const [total, setTotal] = useState(0);
   const watchedLineItems = useWatch({
-  control: form.control,
-  name: "lineItems",
-  defaultValue: form.getValues("lineItems"),
-});
+    control: form.control,
+    name: "lineItems",
+    defaultValue: form.getValues("lineItems"),
+  });
 
   useEffect(() => {
     if (!watchedLineItems) return;
@@ -398,6 +450,15 @@ export default function EditInvoicePage() {
 
           <div className="border rounded-md">
             <div className="overflow-x-auto">
+                 <div className="flex justify-end m-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowTripModal(true)}
+                >
+                  + Add Trips
+                </Button>
+              </div>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -715,6 +776,12 @@ export default function EditInvoicePage() {
           </Card>
         </form>
       </Form>
+      <TripSelectorModal
+        open={showTripModal}
+        onClose={() => setShowTripModal(false)}
+        onAdd={handleAddTrips}
+        customerId="CUST-001"
+      />
     </div>
   );
 }
