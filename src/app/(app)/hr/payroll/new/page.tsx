@@ -101,10 +101,10 @@ export default function NewPayrollRunPage() {
     name: "employees",
   });
 
- const watchEmployees = useWatch({
-  control: form.control,
-  name: "employees",
-});
+  const watchEmployees = useWatch({
+    control: form.control,
+    name: "employees",
+  });
 
   const [totals, setTotals] = useState({
     gross: 0,
@@ -117,28 +117,29 @@ export default function NewPayrollRunPage() {
     Record<string, boolean>
   >({});
   const [searchTerm, setSearchTerm] = useState("");
-  
- useEffect(() => {
-  if (!watchEmployees) return;
 
-  const newTotals = watchEmployees.reduce(
-    (acc, emp) => {
-      const gross = (emp?.basePay || 0) + (emp?.overtime || 0) + (emp?.bonus || 0);
-      const totalDeductions = (emp?.taxes || 0) + (emp?.deductions || 0);
-      const net = gross - totalDeductions;
+  useEffect(() => {
+    if (!watchEmployees) return;
 
-      acc.gross += gross;
-      acc.taxes += emp?.taxes || 0;
-      acc.deductions += emp?.deductions || 0;
-      acc.net += net;
+    const newTotals = watchEmployees.reduce(
+      (acc, emp) => {
+        const gross =
+          (emp?.basePay || 0) + (emp?.overtime || 0) + (emp?.bonus || 0);
+        const totalDeductions = (emp?.taxes || 0) + (emp?.deductions || 0);
+        const net = gross - totalDeductions;
 
-      return acc;
-    },
-    { gross: 0, taxes: 0, deductions: 0, net: 0 }
-  );
+        acc.gross += gross;
+        acc.taxes += emp?.taxes || 0;
+        acc.deductions += emp?.deductions || 0;
+        acc.net += net;
 
-  setTotals(newTotals);
-}, [watchEmployees]);
+        return acc;
+      },
+      { gross: 0, taxes: 0, deductions: 0, net: 0 }
+    );
+
+    setTotals(newTotals);
+  }, [watchEmployees]);
   const availableEmployees = allEmployees.filter(
     (emp) => !fields.some((f) => f.employeeId === emp.id)
   );
@@ -156,7 +157,7 @@ export default function NewPayrollRunPage() {
       append({
         employeeId: emp?.id,
         name: emp?.name,
-        basePay: 2000,
+        basePay: emp?.baseSalary || 0,
         taxes: 2,
         overtime: 0,
         bonus: 0,
@@ -366,7 +367,7 @@ export default function NewPayrollRunPage() {
                               <FormControl>
                                 <Input
                                   type="number"
-                                    value={field.value ?? ""}
+                                  value={field.value ?? ""}
                                   onChange={(e) =>
                                     field.onChange(Number(e.target.value) || 0)
                                   }
@@ -389,7 +390,7 @@ export default function NewPayrollRunPage() {
                               <FormControl>
                                 <Input
                                   type="number"
-                                   value={field.value ?? ""}
+                                  value={field.value ?? ""}
                                   onChange={(e) =>
                                     field.onChange(Number(e.target.value) || 0)
                                   }
@@ -409,7 +410,7 @@ export default function NewPayrollRunPage() {
                               <FormControl>
                                 <Input
                                   type="number"
-                                      value={field.value ?? ""}
+                                  value={field.value ?? ""}
                                   onChange={(e) =>
                                     field.onChange(Number(e.target.value) || 0)
                                   }
