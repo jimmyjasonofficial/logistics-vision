@@ -47,7 +47,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getEmployees, type Employee } from "@/services/employee-service";
-import { createPayrollRunAction } from "../actions";
+import { createPayrollRunAction, getTripsForPayrollAction } from "../actions";
 import { useToast } from "@/hooks/use-toast";
 
 const employeePayrollSchema = z.object({
@@ -149,26 +149,84 @@ export default function NewPayrollRunPage() {
       (emp.role && emp.role.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const handleAddFromDialog = () => {
-    const employeesToAdd = allEmployees.filter(
-      (emp) => selectedInDialog[emp.id]
-    );
-    employeesToAdd.forEach((emp) => {
+  // const handleAddFromDialog = () => {
+  //   const employeesToAdd = allEmployees.filter(
+  //     (emp) => selectedInDialog[emp.id]
+  //   );
+  //   employeesToAdd.forEach((emp) => {
+  //     append({
+  //       employeeId: emp?.id,
+  //       name: emp?.name,
+  //       basePay: emp?.baseSalary || 0,
+  //       taxes: 2,
+  //       overtime: 0,
+  //       bonus: 0,
+  //       deductions: 50,
+  //     });
+  //   });
+
+  //   setIsAddEmployeeDialogOpen(false);
+  //   setSelectedInDialog({});
+  //   setSearchTerm("");
+  // };
+const handleAddFromDialog = async () => {
+  const OVERTIME_RATE_PER_KM = 0.45;
+
+  setFormLoading(true);
+
+  const employeesToAdd = allEmployees.filter(
+    (emp) => selectedInDialog[emp.id]
+  );
+
+  // Loop through each selected employee
+  for (const emp of employeesToAdd) {
+    try {
+      // ✅ Fetch trips for this employee (within selected date range)
+      const actionResult = await getTripsForPayrollAction({
+        driverId: emp.id,
+        startDate: form.getValues("payPeriodStart"),
+        endDate: form.getValues("payPeriodEnd"),
+      });
+
+      let overtime = 0;
+      if (!("error" in actionResult)) {
+        const driverTrips = actionResult.trips || [];
+        const totalKm = driverTrips.reduce(
+          (sum, trip) => sum + (trip.distance || 0),
+          0
+        );
+        overtime = totalKm * OVERTIME_RATE_PER_KM; 
+      }
+
+    
       append({
-        employeeId: emp?.id,
-        name: emp?.name,
-        basePay: emp?.baseSalary || 0,
+        employeeId: emp.id,
+        name: emp.name,
+        basePay: emp.baseSalary || 0,
+        overtime,
         taxes: 2,
-        overtime: 0,
         bonus: 0,
         deductions: 50,
       });
-    });
+    } catch (error) {
+      console.warn("Error calculating overtime for employee:", emp.name, error);
+      append({
+        employeeId: emp.id,
+        name: emp.name,
+        basePay: emp.baseSalary || 0,
+        overtime: 0,
+        taxes: 2,
+        bonus: 0,
+        deductions: 50,
+      });
+    }
+  }
 
-    setIsAddEmployeeDialogOpen(false);
-    setSelectedInDialog({});
-    setSearchTerm("");
-  };
+  setFormLoading(false);
+  setIsAddEmployeeDialogOpen(false);
+  setSelectedInDialog({});
+  setSearchTerm("");
+};
 
   const handleSelectInDialog = (employeeId: string, checked: boolean) => {
     setSelectedInDialog((prev) => ({ ...prev, [employeeId]: checked }));
@@ -347,7 +405,7 @@ export default function NewPayrollRunPage() {
                               <FormControl>
                                 <Input
                                   type="number"
-                                  value={field.value ?? ""}
+                                  value={field.value?.toFixed(2) ?? ""}
                                   onChange={(e) =>
                                     field.onChange(Number(e.target.value) || 0)
                                   }

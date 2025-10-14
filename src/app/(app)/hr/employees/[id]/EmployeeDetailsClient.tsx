@@ -270,6 +270,7 @@ export default function EmployeeDetailsClient({
                         <TableRow>
                           <TableHead>Trip ID</TableHead>
                           <TableHead>Route</TableHead>
+                          <TableHead>Date</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead className="text-right">Revenue</TableHead>
                         </TableRow>
@@ -288,6 +289,7 @@ export default function EmployeeDetailsClient({
                             <TableCell>
                               {trip?.origin} &rarr; {trip?.destination}
                             </TableCell>
+                            <TableCell>{trip?.date}</TableCell>
                             <TableCell>
                               <Badge
                                 variant={

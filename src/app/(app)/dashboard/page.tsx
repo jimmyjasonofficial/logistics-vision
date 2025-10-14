@@ -239,6 +239,7 @@ export default async function DashboardPage() {
                 <TableHead>Trip ID</TableHead>
                 <TableHead>Customer</TableHead>
                 <TableHead>Destination</TableHead>
+                <TableHead>Date</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>
                   <span className="sr-only">Actions</span>
@@ -255,6 +256,7 @@ export default async function DashboardPage() {
                     </TableCell>
                     <TableCell>{trip.customer}</TableCell>
                     <TableCell>{trip.destination}</TableCell>
+                    <TableCell>{trip.date}</TableCell>
                     <TableCell>
                       <Badge variant={getStatusVariant(trip.status) as 'default' | 'secondary' | 'outline' | 'destructive'}>{trip.status}</Badge>
                     </TableCell>

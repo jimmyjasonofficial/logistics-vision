@@ -61,6 +61,7 @@ export async function getTrips(
     const db = ensureDbConnected();
     let query: FirebaseFirestore.Query = db.collection("trips");
 
+    // Apply filters based on provided options
     if (options.startDate) {
       query = query.where("estimatedDelivery", ">=", options.startDate);
     }
@@ -71,17 +72,34 @@ export async function getTrips(
       query = query.where("customerId", "==", options.customerId);
     }
 
+    // Order results by delivery or pickup time
     if (options.startDate || options.endDate) {
       query = query.orderBy("estimatedDelivery", "desc");
     } else {
       query = query.orderBy("pickupTime", "desc");
     }
 
+    // Fetch all trips
     const tripsSnapshot = await query.get();
     if (tripsSnapshot.empty) {
       return [];
     }
-    return tripsSnapshot.docs.map((doc) => doc.data() as Trip);
+
+    // Map Firestore documents to Trip objects
+    const trips = tripsSnapshot.docs.map((doc) => {
+      const data = doc.data() as Trip;
+
+      // ✅ If there's no "date" field, extract it from "pickupTime"
+      if (!data.date && data.pickupTime) {
+        // Only get the date portion (before 'T')
+        const formattedDate = data.pickupTime.split("T")[0];
+        data.date = formattedDate;
+      }
+
+      return data;
+    });
+
+    return trips;
   } catch (error: any) {
     console.warn(
       `Could not connect to Firestore to get trips. Returning empty array. Error: ${error.message}`
@@ -89,6 +107,7 @@ export async function getTrips(
     return [];
   }
 }
+
 
 export async function getTripById(id: string): Promise<Trip | null> {
   try {
@@ -99,7 +118,17 @@ export async function getTripById(id: string): Promise<Trip | null> {
     if (!docSnap.exists) {
       return null;
     }
-    return docSnap.data() as Trip;
+
+    // Get the trip data
+    const data = docSnap.data() as Trip;
+
+    // ✅ If "date" is missing, extract it from "pickupTime"
+    if (!data.date && data.pickupTime) {
+      const formattedDate = data.pickupTime.split("T")[0]; // e.g. "2025-10-30"
+      data.date = formattedDate;
+    }
+
+    return data;
   } catch (error: any) {
     console.warn(
       `Could not connect to Firestore to get trip ${id}. Returning null. Error: ${error.message}`
@@ -107,6 +136,7 @@ export async function getTripById(id: string): Promise<Trip | null> {
     return null;
   }
 }
+
 export async function deleteTrip(id: string): Promise<void> {
   const db = ensureDbConnected();
   const docRef = db.collection("trips").doc(id);

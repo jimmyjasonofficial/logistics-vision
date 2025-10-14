@@ -52,7 +52,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getEmployees, type Employee } from "@/services/employee-service";
 import { getPayrollRunById, type PayrollRun } from "@/services/payroll-service";
-import { updatePayrollRunAction, finalizePayrollRunAction } from "../actions";
+import { updatePayrollRunAction, finalizePayrollRunAction, getTripsForPayrollAction } from "../actions";
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog,
@@ -209,11 +209,48 @@ export default function EditPayrollRunPage() {
       (emp.role && emp.role.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const handleAddFromDialog = () => {
-    const employeesToAdd = allEmployees.filter(
-      (emp) => selectedInDialog[emp.id]
-    );
-    employeesToAdd.forEach((emp) => {
+const OVERTIME_RATE_PER_KM = 0.45;
+
+const handleAddFromDialog = async () => {
+  setFormLoading(true); // optional loading indicator
+
+  const employeesToAdd = allEmployees.filter(
+    (emp) => selectedInDialog[emp.id]
+  );
+
+  for (const emp of employeesToAdd) {
+    try {
+      // ✅ Fetch trips for this employee (for the selected payroll period)
+      const actionResult = await getTripsForPayrollAction({
+        driverId: emp.id,
+        startDate: form.getValues("payPeriodStart"),
+        endDate: form.getValues("payPeriodEnd"),
+      });
+
+      let overtime = 0;
+
+      // ✅ If trips found, calculate total KM and overtime pay
+      if (!("error" in actionResult)) {
+        const driverTrips = actionResult.trips || [];
+        const totalKm = driverTrips.reduce(
+          (sum, trip) => sum + (trip.distance || 0),
+          0
+        );
+        overtime = totalKm * OVERTIME_RATE_PER_KM;
+      }
+
+      // ✅ Append employee with calculated overtime
+      append({
+        employeeId: emp.id,
+        name: emp.name,
+        basePay: emp.baseSalary || 2000,
+        taxes: (emp.baseSalary || 2000) * 0.2,
+        overtime,
+        bonus: 0,
+        deductions: 50,
+      });
+    } catch (error) {
+      console.error("Overtime calculation failed for:", emp.name, error);
       append({
         employeeId: emp.id,
         name: emp.name,
@@ -223,11 +260,15 @@ export default function EditPayrollRunPage() {
         bonus: 0,
         deductions: 50,
       });
-    });
-    setIsAddEmployeeDialogOpen(false);
-    setSelectedInDialog({});
-    setSearchTerm("");
-  };
+    }
+  }
+
+  setFormLoading(false);
+  setIsAddEmployeeDialogOpen(false);
+  setSelectedInDialog({});
+  setSearchTerm("");
+};
+
 
   const handleSelectInDialog = (employeeId: string, checked: boolean) => {
     setSelectedInDialog((prev) => ({ ...prev, [employeeId]: checked }));

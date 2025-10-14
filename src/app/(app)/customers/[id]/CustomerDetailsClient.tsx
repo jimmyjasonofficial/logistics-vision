@@ -3,12 +3,7 @@
 import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -154,7 +149,9 @@ export default function CustomerDetailsClient({
                 <User className="h-5 w-5 text-muted-foreground mt-1" />
                 <div>
                   <p className="font-medium">{customer.name}</p>
-                  <p className="text-sm text-muted-foreground">Primary Contact</p>
+                  <p className="text-sm text-muted-foreground">
+                    Primary Contact
+                  </p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -175,7 +172,9 @@ export default function CustomerDetailsClient({
                 <MapPin className="h-5 w-5 text-muted-foreground mt-1" />
                 <div>
                   <p className="font-medium">{customer.address}</p>
-                  <p className="text-sm text-muted-foreground">Billing Address</p>
+                  <p className="text-sm text-muted-foreground">
+                    Billing Address
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -188,12 +187,16 @@ export default function CustomerDetailsClient({
             <CardContent className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Lifetime Value</span>
-                <span className="font-bold text-lg">${lifetimeValue.toLocaleString()}</span>
+                <span className="font-bold text-lg">
+                  ${lifetimeValue.toLocaleString()}
+                </span>
               </div>
               <Separator />
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Outstanding</span>
-                <span className="font-bold text-lg">${outstandingBalance.toLocaleString()}</span>
+                <span className="font-bold text-lg">
+                  ${outstandingBalance.toLocaleString()}
+                </span>
               </div>
               <Separator />
               <div className="flex justify-between items-center">
@@ -222,57 +225,57 @@ export default function CustomerDetailsClient({
             {/* Trips Tab */}
             <TabsContent value="trips">
               <Card>
-                       <CardHeader>
-                    <CardTitle>Recent Trips</CardTitle>
-                    <Form {...form}>
-                      <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
-                        <div className="flex flex-wrap gap-4 flex-grow">
-                          <FormField
-                            control={control}
-                            name="startDate"
-                            render={({ field }) => (
-                              <FormItem className="w-48">
-                                <FormLabel>Start Date</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    type="date"
-                                    {...field}
-                                    value={field.value}
-                                  />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
+                <CardHeader>
+                  <CardTitle>Recent Trips</CardTitle>
+                  <Form {...form}>
+                    <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
+                      <div className="flex flex-wrap gap-4 flex-grow">
+                        <FormField
+                          control={control}
+                          name="startDate"
+                          render={({ field }) => (
+                            <FormItem className="w-48">
+                              <FormLabel>Start Date</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="date"
+                                  {...field}
+                                  value={field.value}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
 
-                          <FormField
-                            control={control}
-                            name="endDate"
-                            render={({ field }) => (
-                              <FormItem className="w-48">
-                                <FormLabel>End Date</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    type="date"
-                                    {...field}
-                                    value={field.value}
-                                  />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={handleReset}
-                          className="self-end"
-                        >
-                          Reset Filters
-                        </Button>
+                        <FormField
+                          control={control}
+                          name="endDate"
+                          render={({ field }) => (
+                            <FormItem className="w-48">
+                              <FormLabel>End Date</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="date"
+                                  {...field}
+                                  value={field.value}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
                       </div>
-                    </Form>
-                  </CardHeader>
+
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleReset}
+                        className="self-end"
+                      >
+                        Reset Filters
+                      </Button>
+                    </div>
+                  </Form>
+                </CardHeader>
 
                 <CardContent>
                   <Table>
@@ -280,7 +283,9 @@ export default function CustomerDetailsClient({
                       <TableRow>
                         <TableHead>Trip ID</TableHead>
                         <TableHead>Route</TableHead>
+                        <TableHead>Date</TableHead>
                         <TableHead>Status</TableHead>
+
                         <TableHead className="text-right">Revenue</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -295,9 +300,14 @@ export default function CustomerDetailsClient({
                               {trip.id}
                             </Link>
                           </TableCell>
-                          <TableCell>{trip.origin} → {trip.destination}</TableCell>
                           <TableCell>
-                            <Badge variant={getTripStatusVariant(trip.status) as any}>
+                            {trip.origin} → {trip.destination}
+                          </TableCell>
+                          <TableCell>{trip?.date}</TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={getTripStatusVariant(trip.status) as any}
+                            >
                               {trip.status}
                             </Badge>
                           </TableCell>
@@ -341,7 +351,11 @@ export default function CustomerDetailsClient({
                           </TableCell>
                           <TableCell>{invoice.dueDate}</TableCell>
                           <TableCell>
-                            <Badge variant={getInvoiceStatusVariant(invoice.status) as any}>
+                            <Badge
+                              variant={
+                                getInvoiceStatusVariant(invoice.status) as any
+                              }
+                            >
                               {invoice.status}
                             </Badge>
                           </TableCell>

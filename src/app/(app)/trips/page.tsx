@@ -9,6 +9,7 @@ import { TripsClientPage } from "./trips-client";
 export default async function TripsPage() {
   const trips = await getTrips();
 
+
   return (
     <div className="flex-1 space-y-8">
       <div className="flex items-center justify-between space-y-2">
