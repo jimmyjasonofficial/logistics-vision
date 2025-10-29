@@ -128,9 +128,8 @@ export function TripsClientPage({ trips }: { trips: Trip[] }) {
               </CardDescription>
             </div>
             <Button
-            disabled
-              // disabled={selectedTrips.length === 0 || loading}
-              // onClick={handleGenerateInvoice}
+              disabled={selectedTrips.length === 0 || loading}
+              onClick={handleGenerateInvoice}
               className="ml-auto"
             >
               {loading ? "Generating..." : "Generate Invoice"}

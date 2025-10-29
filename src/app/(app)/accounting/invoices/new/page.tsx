@@ -95,7 +95,7 @@ export default function NewInvoicePage() {
         unitPrice: firstTrip.revenue || 0,
         discount: 0,
         account: "200 - Sales",
-        taxRate: "Tax on Sales (15%)",
+        taxRate: "VAT / Tax on Sales (15%)",
       });
 
       restTrips.forEach((trip) => {
@@ -106,7 +106,7 @@ export default function NewInvoicePage() {
           unitPrice: trip.revenue || 0,
           discount: 0,
           account: "200 - Sales",
-          taxRate: "Tax on Sales (15%)",
+          taxRate: "VAT / Tax on Sales (15%)",
         });
       });
     } else {
@@ -118,7 +118,7 @@ export default function NewInvoicePage() {
           unitPrice: trip.revenue || 0,
           discount: 0,
           account: "200 - Sales",
-          taxRate: "Tax on Sales (15%)",
+          taxRate: "VAT / Tax on Sales (15%)",
         });
       });
     }
@@ -247,7 +247,7 @@ export default function NewInvoicePage() {
       const discountedTotal = lineTotal - discountAmount;
 
       const taxAmount =
-        item.taxRate === "Tax on Sales (15%)"
+        item.taxRate === "VAT / Tax on Sales (15%)"
           ? discountedTotal * (TAX_RATE_PERCENTAGE / 100)
           : 0;
 
@@ -446,12 +446,12 @@ export default function NewInvoicePage() {
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="exclusive">
-                            Tax Exclusive
+                            VAT / Tax Exclusive
                           </SelectItem>
                           <SelectItem value="inclusive">
-                            Tax Inclusive
+                            VAT / Tax Inclusive
                           </SelectItem>
-                          <SelectItem value="no_tax">No Tax</SelectItem>
+                          <SelectItem value="no_tax">No VAT / Tax</SelectItem>
                         </SelectContent>
                       </Select>
                     </FormItem>
@@ -467,7 +467,7 @@ export default function NewInvoicePage() {
                 <Button
                   type="button"
                   variant="outline"
-                  // onClick={() => setShowTripModal(true)}
+                  onClick={() => setShowTripModal(true)}
                 >
                   + Add Trips
                 </Button>
@@ -488,9 +488,9 @@ export default function NewInvoicePage() {
                       Disc. %
                     </TableHead>
                     <TableHead className="min-w-[200px]">Account</TableHead>
-                    <TableHead className="min-w-[150px]">Tax rate</TableHead>
+                    <TableHead className="min-w-[150px]">VAT / Tax rate</TableHead>
                     <TableHead className="w-[120px] text-right">
-                      Tax amount
+                      VAT / Tax amount
                     </TableHead>
                     <TableHead className="w-[150px] text-right">
                       Amount
@@ -512,7 +512,7 @@ export default function NewInvoicePage() {
                     const discountAmount = lineTotal * (discount / 100);
                     const discountedTotal = lineTotal - discountAmount;
                     const taxAmount =
-                      lineItem.taxRate === "Tax on Sales (15%)"
+                      lineItem.taxRate === "VAT / Tax on Sales (15%)"
                         ? discountedTotal * (TAX_RATE_PERCENTAGE / 100)
                         : 0;
                     const finalAmount = discountedTotal + taxAmount;
@@ -650,12 +650,12 @@ export default function NewInvoicePage() {
                                 >
                                   <FormControl>
                                     <SelectTrigger className="mt-1">
-                                      <SelectValue placeholder="Select tax rate" />
+                                      <SelectValue placeholder="Select VAT / Tax rate" />
                                     </SelectTrigger>
                                   </FormControl>
                                   <SelectContent>
-                                    <SelectItem value="Tax on Sales (15%)">
-                                      Tax on Sales (15%)
+                                    <SelectItem value="VAT / Tax on Sales (15%)">
+                                      VAT / Tax on Sales (15%)
                                     </SelectItem>
                                     <SelectItem value="Exempt">
                                       Exempt
@@ -704,7 +704,7 @@ export default function NewInvoicePage() {
                     unitPrice: 0,
                     discount: 0,
                     account: "200 - Sales",
-                    taxRate: "Tax on Sales (15%)",
+                    taxRate: "VAT / Tax on Sales (15%)",
                   })
                 }
                 disabled={loading}
@@ -716,7 +716,7 @@ export default function NewInvoicePage() {
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Subtotal</span>
                 <span className="font-medium">
-                  $
+                  N$
                   {subtotal.toLocaleString("en-US", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
@@ -724,9 +724,9 @@ export default function NewInvoicePage() {
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Total tax</span>
+                <span className="text-muted-foreground">Total VAT / Tax</span>
                 <span className="font-medium">
-                  $
+                  N$
                   {totalTax.toLocaleString("en-US", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
@@ -735,13 +735,13 @@ export default function NewInvoicePage() {
               </div>
               <div className="flex justify-between text-muted-foreground">
                 <span className="">Credit available</span>
-                <span className="font-medium">$0.00</span>
+                <span className="font-medium">N$0.00</span>
               </div>
               <Separator />
               <div className="flex justify-between font-bold text-lg">
                 <span>TOTAL</span>
                 <span>
-                  $
+                  N$
                   {total.toLocaleString("en-US", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,

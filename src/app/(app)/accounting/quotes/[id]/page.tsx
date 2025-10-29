@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { getQuoteById } from '@/services/quote-service';
 import { SendQuoteButton } from '../send-quote-button';
 import { AcceptQuoteButton } from '../accept-quote-button';
+import DownloadWithData from '../handleDownloadWithData';
 
 const getStatusVariant = (status: string) => {
   switch (status) {
@@ -24,7 +25,7 @@ const getStatusVariant = (status: string) => {
 export default async function QuoteDetailsPage({ params }: { params: { id: string } }) {
   const { id } = params;
   const quote = await getQuoteById(id);
-
+console.log(quote, 'popopowfjbshabv')
   if (!quote) {
     notFound();
   }
@@ -112,7 +113,7 @@ export default async function QuoteDetailsPage({ params }: { params: { id: strin
             </div>
         </CardContent>
         <Separator />
-         <CardContent className="pt-6">
+         {/* <CardContent className="pt-6">
             <h3 className="text-lg font-semibold mb-2">Attachments</h3>
              {quote.attachmentUrl ? (
                 <Button variant="secondary" asChild>
@@ -126,6 +127,34 @@ export default async function QuoteDetailsPage({ params }: { params: { id: strin
                     <p>No documents uploaded.</p>
                 </div>
             )}
+         </CardContent> */}
+         <CardContent className="pt-6">
+           <h3 className="text-lg font-semibold mb-2">Attachments</h3>
+           {quote.attachmentUrl ? (
+             <div className="flex gap-2">
+               {/* <Button variant="secondary" asChild>
+                 <Link
+                   href={invoice.attachmentUrl}
+                   target="_blank"
+                   rel="noopener noreferrer"
+                 >
+                   <Download className="mr-2 h-4 w-4" /> Download Original
+                 </Link>
+               </Button> */}
+               
+               {/* Yahan updated PDF download ka button add karen */}
+               <DownloadWithData quoteData={quote} />
+             </div>
+           ) : (
+             <div className="text-center text-muted-foreground p-4 border-2 border-dashed rounded-lg">
+               <FileText className="h-6 w-6 mx-auto mb-2" />
+               <p>No documents uploaded.</p>
+               {/* Agar koi attachment nahi hai, tab bhi updated PDF download kar sakte hain */}
+               {/* <div className="mt-4">
+                 <DownloadWithData invoiceData={invoice} />
+               </div> */}
+             </div>
+           )}
          </CardContent>
       </Card>
     </div>

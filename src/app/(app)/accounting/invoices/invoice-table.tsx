@@ -50,7 +50,7 @@ export function InvoiceTable({ invoices }: InvoiceTableProps) {
             <TableCell><Link href={`/customers/${invoice.customerId}`} className="text-primary hover:underline">{invoice.customer}</Link></TableCell>
             <TableCell>{invoice.dateIssued}</TableCell>
             <TableCell>{invoice.dueDate}</TableCell>
-            <TableCell className="text-right">${invoice.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}</TableCell>
+            <TableCell className="text-right">N${invoice.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}</TableCell>
             <TableCell><Badge variant={getStatusVariant(invoice.status)}>{invoice.status}</Badge></TableCell>
             <TableCell>
               <DropdownMenu>
