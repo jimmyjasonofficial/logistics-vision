@@ -1,6 +1,5 @@
 "use client";
 
-
 // import Link from "next/link";
 // import {
 //   Table,
@@ -179,7 +178,6 @@
 //                     Download Payslip
 //                   </DropdownMenuItem>
 
-
 //                   <DeleteMenuItem
 //                     name={"Payroll"}
 //                     handleDelete={() => handleDelete(payroll?.id)}
@@ -196,9 +194,6 @@
 //     </Table>
 //   );
 // }
-
-
-
 
 import Link from "next/link";
 import {
@@ -254,389 +249,315 @@ const getStatusVariant = (status: string) => {
 };
 
 // PDF Download Function
-const downloadPDF = async (payroll: any) => {
+
+
+export const downloadPDF = async (payroll: any) => {
   const pdfDoc = await PDFDocument.create();
   const page = pdfDoc.addPage([595, 842]); // A4 size
   const { width, height } = page.getSize();
-  
+
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-  
   let y = height - 50;
 
   try {
-    // Using a placeholder for Laxmi logo - replace with your actual logo path
-    const logoUrl = '/images/Logo.png'; // Adjust path as needed
+    const logoUrl =
+      "https://custom3.mystagingserver.site/logistics/logo.png";
+
     const logoResponse = await fetch(logoUrl);
-    
     if (logoResponse.ok) {
-      const logoImageBytes = await logoResponse.arrayBuffer();
-      
-      // Check if it's PNG or JPEG
-      const isPng = logoUrl.toLowerCase().endsWith('.png');
-      const logoImage = isPng 
-        ? await pdfDoc.embedPng(logoImageBytes)
-        : await pdfDoc.embedJpg(logoImageBytes);
-      
-      const logoDims = logoImage.scale(0.50); // Adjust scale as needed for your logo
-      
-      page.drawImage(logoImage, {
+      const logoBytes = await logoResponse.arrayBuffer();
+      const logoImg = logoUrl.toLowerCase().endsWith(".png")
+        ? await pdfDoc.embedPng(logoBytes)
+        : await pdfDoc.embedJpg(logoBytes);
+      const logoDims = logoImg.scale(0.5);
+
+      page.drawImage(logoImg, {
         x: 40,
         y: y - 40,
         width: logoDims.width,
         height: logoDims.height,
       });
-    } else {
-      // Fallback: Draw placeholder with Laxmi text
-      page.drawRectangle({
-        x: 50,
-        y: y - 40,
-        width: 80,
-        height: 40,
-        color: rgb(0.9, 0.9, 0.9),
-      });
-      page.drawText("LAXMI", {
-        x: 60,
-        y: y - 20,
-        size: 10,
-        font: fontBold,
-        color: rgb(0.2, 0.2, 0.6),
-      });
-      page.drawText("LOGO", {
-        x: 65,
-        y: y - 35,
-        size: 8,
-        font: font,
-        color: rgb(0.2, 0.2, 0.6),
-      });
     }
-  } catch (error) {
-    console.log("Laxmi logo not available, using text placeholder");
-  
+  } catch {
+    console.log("Logo not available");
   }
 
-  // PAYSLIP Title
-  page.drawText("PAYSLIP", {
-      x: 50,
+  // ===== HEADER =====
+  page.drawText(`PAYSLIP ${payroll?.id || ""}`, {
+    x: 50,
     y: y - 60,
     size: 18,
     font: fontBold,
-    color: rgb(0, 0, 0),
   });
 
-  // Employee Details (Left side)
+  if (payroll?.status) {
+    page.drawText(`Status: ${payroll.status}`, {
+      x: 50,
+      y: y - 75,
+      size: 9,
+      font,
+      color: rgb(0.3, 0.3, 0.3),
+    });
+  }
+
+  // ===== EMPLOYEE DETAILS =====
   const employeeDetails = [
     "Brandon Eugen Narib 94050200155",
     "PO Box 2301",
     "WALVIS BAY ERONGO",
-    "NAMIBIA"
+    "NAMIBIA",
   ];
-  
-  let employeeY = y - 80;
-  employeeDetails.forEach((line, index) => {
+  let employeeY = y - 90;
+  employeeDetails.forEach((line, i) =>
     page.drawText(line, {
       x: 50,
-      y: employeeY - (index * 14),
+      y: employeeY - i * 14,
       size: 10,
-      font: font,
-    });
-  });
+      font,
+    })
+  );
 
-  // Pay Details (Right side)
+  // ===== PAY DETAILS =====
   const payDetails = [
-    { label: "Pay Day", value: "7 Feb 2025" },
-    { label: "Pay Period", value: "1 Jan 2025 to 31 Jan 2025" },
+    { label: "Pay Day", value: payroll?.paymentDate || "7 Feb 2025" },
+    {
+      label: "Pay Period",
+      value: `${payroll?.payPeriodStart || "1 Jan 2025"} to ${
+        payroll?.payPeriodEnd || "31 Jan 2025"
+      }`,
+    },
     { label: "Employee Tax Number", value: "INF NB 0013 Load Master" },
   ];
 
   let payDetailsY = y - 60;
-  payDetails.forEach((item, index) => {
+  payDetails.forEach((item, i) => {
     page.drawText(item.label, {
       x: width - 300,
-      y: payDetailsY - (index * 25),
+      y: payDetailsY - i * 25,
       size: 9,
       font: fontBold,
     });
     page.drawText(item.value, {
       x: width - 300,
-      y: payDetailsY - 14 - (index * 25),
+      y: payDetailsY - 14 - i * 25,
       size: 9,
-      font: font,
+      font,
     });
   });
 
-  // Company Address (Right side, below pay details)
-  const companyAddress = [
+  // ===== COMPANY INFO =====
+  const company = [
     "INFINITY LOGISTICS CC",
-    "1st FLOOR,UNIT 104,",
+    "1st FLOOR, UNIT 104,",
     "BAHNHOF STREET",
-    "TRANSNAMIB,BUILDING",
+    "TRANSNAMIB BUILDING",
     "+264 81 435 7034",
     "PO Box 29111",
     "WINDHOEK 9000",
     "NAMIBIA",
-    "VAT Reg no: ",
-    "10251490"
+    "VAT Reg no:",
+    "10251490",
   ];
-
   let companyY = payDetailsY;
-  companyAddress.forEach((line, index) => {
+  company.forEach((line, i) =>
     page.drawText(line, {
       x: width - 150,
-      y: companyY - (index * 12),
+      y: companyY - i * 12,
       size: 8,
-      font: index === 0 ? fontBold : font,
+      font: i === 0 ? fontBold : font,
+    })
+  );
+
+  // ===== EARNINGS SECTION =====
+  let earningsY = companyY - 120;
+  page.drawText("Earnings", { x: 50, y: earningsY, size: 12, font: fontBold });
+  page.drawText("Amount NAD", {
+    x: width - 350,
+    y: earningsY,
+    size: 10,
+    font: fontBold,
+  });
+
+  page.drawLine({
+    start: { x: 50, y: earningsY - 8 },
+    end: { x: width - 250, y: earningsY - 8 },
+    thickness: 0.2,
+    color: rgb(0, 0, 0),
+  });
+
+  const earnings = [
+    { description: "Basic Salaries (1.00 @ 20800.00)", amount: "20,800.00" },
+    { description: "Over Time (1.00 @ 5100.00)", amount: "5,100.00" },
+    { description: "Back Pay (1.00 @ 4000.00)", amount: "4,000.00" },
+    { description: "INFINITY CONTRIBUTION PRIME", amount: "1,200.00" },
+  ];
+
+  let earningsListY = earningsY - 30;
+  earnings.forEach((item, i) => {
+    page.drawText(item.description, {
+      x: 50,
+      y: earningsListY - i * 20,
+      size: 9,
+      font,
+    });
+    page.drawText(item.amount, {
+      x: width - 350,
+      y: earningsListY - i * 20,
+      size: 9,
+      font,
+    });
+    page.drawLine({
+      start: { x: 50, y: earningsListY - i * 20 - 8 },
+      end: { x: width - 250, y: earningsListY - i * 20 - 8 },
+      thickness: 0.2,
+      color: rgb(0, 0, 0),
     });
   });
 
-// Earnings Section
-let earningsY = companyY - 120;
-page.drawText("Earnings", {
-  x: 50,
-  y: earningsY,
-  size: 12,
-  font: fontBold,
-});
-page.drawText("Amount NAD", {
-  x: width - 350,
-  y: earningsY,
-  size: 10,
-  font: fontBold,
-});
-
-// Draw border under Earnings and Amount NAD headers
-page.drawLine({
-  start: { x: 50, y: earningsY - 8 },
-  end: { x: width - 350 + 100, y: earningsY - 8 }, // Extend to amount column width
-  thickness: 0.2,
-  color: rgb(0, 0, 0),
-});
-
-const earnings = [
-  { description: "Basic Salaries (1.00 @ 20800.00)", amount: "20,800.00" },
-  { description: "Over Time (1.00 @ 5100.00)", amount: "5,100.00" },
-  { description: "Back Pay (1.00 @ 4000.00)", amount: "4,000.00" },
-  { description: "INFINITY CONTRIBUTION PRIME", amount: "1,200.00" },
-];
-
-let earningsListY = earningsY - 30;
-
-// Draw earnings items with borders
-earnings.forEach((item, index) => {
-  page.drawText(item.description, {
+  const totalEarningsY = earningsListY - earnings.length * 20 - 10;
+  page.drawText("Total Earnings", {
     x: 50,
-    y: earningsListY - (index * 20),
-    size: 9,
-    font: font,
+    y: totalEarningsY,
+    size: 10,
+    font: fontBold,
   });
-  
-  page.drawText(item.amount, {
+  page.drawText("31,100.00", {
     x: width - 350,
-    y: earningsListY - (index * 20),
-    size: 9,
-    font: font,
+    y: totalEarningsY,
+    size: 10,
+    font: fontBold,
   });
-  
-  // Draw bottom border for each earnings item
   page.drawLine({
-    start: { x: 50, y: earningsListY - (index * 20) - 8 },
-    end: { x: width - 350 + 100, y: earningsListY - (index * 20) - 8 }, // Extend to amount column width
+    start: { x: 50, y: totalEarningsY - 8 },
+    end: { x: width - 250, y: totalEarningsY - 8 },
+    thickness: 1,
+    color: rgb(0, 0, 0),
+  });
+
+  // ===== DEDUCTIONS =====
+  let deductionsY = totalEarningsY - 40;
+  page.drawText("Deductions", {
+    x: 50,
+    y: deductionsY,
+    size: 12,
+    font: fontBold,
+  });
+  page.drawText("Amount NAD", {
+    x: width - 350,
+    y: deductionsY,
+    size: 10,
+    font: fontBold,
+  });
+  page.drawLine({
+    start: { x: 50, y: deductionsY - 8 },
+    end: { x: width - 250, y: deductionsY - 8 },
     thickness: 0.2,
     color: rgb(0, 0, 0),
   });
-});
 
-// Total Earnings with top border
-const totalEarningsY = earningsListY - (earnings.length * 20) - 10;
+  const deductions = [
+    { description: "Deductions", amount: "5,300.00" },
+    { description: "EMPLOYEE PRIME PROTECTOR", amount: "1,200.00" },
+    { description: "SSC Employee", amount: "40.10" },
+    { description: "Payroll Tax", amount: "417.00" },
+  ];
 
-// Draw top border for Total Earnings
-// page.drawLine({
-//   start: { x: 50, y: totalEarningsY + 15 },
-//   end: { x: width - 350 + 100, y: totalEarningsY + 15 }, // Extend to amount column width
-//   thickness: 1,
-//   color: rgb(0, 0, 0),
-// });
+  let deductionsListY = deductionsY - 30;
+  deductions.forEach((item, i) => {
+    page.drawText(item.description, {
+      x: 50,
+      y: deductionsListY - i * 20,
+      size: 9,
+      font,
+    });
+    page.drawText(item.amount, {
+      x: width - 350,
+      y: deductionsListY - i * 20,
+      size: 9,
+      font,
+    });
+    page.drawLine({
+      start: { x: 50, y: deductionsListY - i * 20 - 8 },
+      end: { x: width - 250, y: deductionsListY - i * 20 - 8 },
+      thickness: 0.2,
+      color: rgb(0, 0, 0),
+    });
+  });
 
-page.drawText("Total Earnings", {
-  x: 50,
-  y: totalEarningsY,
-  size: 10,
-  font: fontBold,
-});
-page.drawText("31,100.00", {
-  x: width - 350,
-  y: totalEarningsY,
-  size: 10,
-  font: fontBold,
-});
-
-// Draw bottom border for Total Earnings
-page.drawLine({
-  start: { x: 50, y: totalEarningsY - 8 },
-  end: { x: width - 350 + 100, y: totalEarningsY - 8 }, // Extend to amount column width
-  thickness: 1,
-  color: rgb(0, 0, 0),
-});
-
-// Deductions Section
-let deductionsY = totalEarningsY - 40;
-page.drawText("Deductions", {
-  x: 50,
-  y: deductionsY,
-  size: 12,
-  font: fontBold,
-});
-
-page.drawText("Amount NAD", {
-  x: width - 350,
-  y: deductionsY,
-  size: 10,
-  font: fontBold,
-});
-
-// Draw border under Deductions and Amount NAD headers
-page.drawLine({
-  start: { x: 50, y: deductionsY - 8 },
-  end: { x: width - 350 + 100, y: deductionsY - 8 }, // Extend to amount column width
-  thickness: 0.2,
-  color: rgb(0, 0, 0),
-});
-
-const deductions = [
-  { description: "Deductions", amount: "5,300.00" },
-  { description: "EMPLOYEE PRIME PROTECTOR", amount: "1,200.00" },
-  { description: "SSC Employee", amount: "40.10" },
-  { description: "Payroll Tax", amount: "417.00" },
-];
-
-let deductionsListY = deductionsY - 30;
-
-// Draw deductions items with borders
-deductions.forEach((item, index) => {
-  page.drawText(item.description, {
+  const totalDeductionsY = deductionsListY - deductions.length * 20 - 10;
+  page.drawText("Total Deductions", {
     x: 50,
-    y: deductionsListY - (index * 20),
-    size: 9,
-    font: font,
+    y: totalDeductionsY,
+    size: 10,
+    font: fontBold,
   });
-  page.drawText(item.amount, {
+  page.drawText("6,957.10", {
     x: width - 350,
-    y: deductionsListY - (index * 20),
-    size: 9,
-    font: font,
+    y: totalDeductionsY,
+    size: 10,
+    font: fontBold,
   });
-  
-  // Draw bottom border for each deductions item
+
+  // ===== TAKE HOME PAY =====
+  const takeHomeY = totalDeductionsY - 30;
   page.drawLine({
-    start: { x: 50, y: deductionsListY - (index * 20) - 8 },
-    end: { x: width - 350 + 100, y: deductionsListY - (index * 20) - 8 }, // Extend to amount column width
+    start: { x: 50, y: takeHomeY + 15 },
+    end: { x: width - 250, y: takeHomeY + 15 },
+    thickness: 1,
+    color: rgb(0, 0, 0),
+  });
+
+  page.drawText("Take Home Pay", {
+    x: 50,
+    y: takeHomeY,
+    size: 12,
+    font: fontBold,
+  });
+  page.drawText(`${payroll?.totalAmount?.toFixed(2) || "24,142.90"}`, {
+    x: width - 350,
+    y: takeHomeY,
+    size: 12,
+    font: fontBold,
+  });
+
+  // ===== SSC 40.10 (ALWAYS STATIC) =====
+  const sscY = takeHomeY - 30;
+
+  page.drawLine({
+    start: { x: 50, y: sscY + 15 },
+    end: { x: width - 250, y: sscY + 15 },
     thickness: 0.2,
     color: rgb(0, 0, 0),
   });
-});
 
-// Total Deductions with top border
-const totalDeductionsY = deductionsListY - (deductions.length * 20) - 10;
+  page.drawText("SSC", { x: 50, y: sscY, size: 9, font });
+  page.drawText("40.10", { x: width - 350, y: sscY, size: 9, font });
 
-// Draw top border for Total Deductions
-// page.drawLine({
-//   start: { x: 50, y: totalDeductionsY + 15 },
-//   end: { x: width - 350 + 100, y: totalDeductionsY + 15 }, // Extend to amount column width
-//   thickness: 1,
-//   color: rgb(0, 0, 0),
-// });
+  page.drawLine({
+    start: { x: 50, y: sscY - 8 },
+    end: { x: width - 250, y: sscY - 8 },
+    thickness: 0.2,
+    color: rgb(0, 0, 0),
+  });
 
-page.drawText("Total Deductions", {
-  x: 50,
-  y: totalDeductionsY,
-  size: 10,
-  font: fontBold,
-});
-page.drawText("6,957.10", {
-  x: width - 350,
-  y: totalDeductionsY,
-  size: 10,
-  font: fontBold,
-});
+  // ===== FOOTER NOTE =====
+  const footerY = sscY - 30;
+  page.drawText(`Employees: ${payroll?.employeesCount || "N/A"}`, {
+    x: 50,
+    y: footerY,
+    size: 9,
+    font,
+  });
 
-// Draw bottom border for Total Deductions
-// page.drawLine({
-//   start: { x: 50, y: totalDeductionsY - 8 },
-//   end: { x: width - 350 + 100, y: totalDeductionsY - 8 }, // Extend to amount column width
-//   thickness: 1,
-//   color: rgb(0, 0, 0),
-// });
-
-// Take Home Pay with borders
-const takeHomeY = totalDeductionsY - 30;
-
-// Draw top border for Take Home Pay
-page.drawLine({
-  start: { x: 50, y: takeHomeY + 15 },
-  end: { x: width - 350 + 100, y: takeHomeY + 15 }, // Extend to amount column width
-  thickness: 1,
-  color: rgb(0, 0, 0),
-});
-
-page.drawText("Take Home Pay", {
-  x: 50,
-  y: takeHomeY,
-  size: 12,
-  font: fontBold,
-});
-page.drawText("24,142.90", {
-  x: width - 350,
-  y: takeHomeY,
-  size: 12,
-  font: fontBold,
-});
-
-// Draw bottom border for Take Home Pay
-// page.drawLine({
-//   start: { x: 50, y: takeHomeY - 8 },
-//   end: { x: width - 350 + 100, y: takeHomeY - 8 }, // Extend to amount column width
-//   thickness: 1,
-//   color: rgb(0, 0, 0),
-// });
-
-// SSC at bottom with borders
-const sscY = takeHomeY - 30;
-
-// Draw top border for SSC
-page.drawLine({
-  start: { x: 50, y: sscY + 15 },
-  end: { x: width - 350 + 100, y: sscY + 15 }, // Extend to amount column width
-  thickness: 0.2,
-  color: rgb(0, 0, 0),
-});
-
-page.drawText("SSC", {
-  x: 50,
-  y: sscY,
-  size: 9,
-  font: font,
-});
-page.drawText("40.10", {
-  x: width - 350,
-  y: sscY,
-  size: 9,
-  font: font,
-});
-
-// Draw bottom border for SSC
-page.drawLine({
-  start: { x: 50, y: sscY - 8 },
-  end: { x: width - 350 + 100, y: sscY - 8 }, // Extend to amount column width
-  thickness: 0.2,
-  color: rgb(0, 0, 0),
-});
-
-  // Save and download PDF
+  // ===== SAVE =====
   const pdfBytes = await pdfDoc.save();
   const blob = new Blob([pdfBytes], { type: "application/pdf" });
+  const fileName = `Payslip-${new Date().getFullYear()}-${payroll?.id || "0000"}.pdf`;
+
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
-  link.download = `payslip-${payroll.id}.pdf`;
+  link.download = fileName;
   link.click();
   URL.revokeObjectURL(link.href);
 };
@@ -763,7 +684,7 @@ export function PayrollTable({ payrollRuns }: PayrollTableProps) {
                   </DropdownMenuItem>
 
                   {/* Download Payslip Option */}
-                  <DropdownMenuItem 
+                  <DropdownMenuItem
                     onClick={() => handleDownloadPayslip(payroll)}
                     disabled={loading}
                   >

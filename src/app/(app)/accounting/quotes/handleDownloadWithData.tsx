@@ -45,7 +45,7 @@ export default function DownloadWithData({ quoteData }: DownloadWithDataProps) {
       const pdfDoc = await PDFDocument.create();
       const page = pdfDoc.addPage([595, 842]); // A4 in points approx.
       const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-const boldFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      const boldFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
       // Colors
       const black = rgb(0, 0, 0);
@@ -56,7 +56,7 @@ const boldFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
       const pageHeight = page.getHeight();
 
       try {
-        const logoResponse = await fetch("/images/Logo.png");
+        const logoResponse = await fetch("https://custom3.mystagingserver.site/logistics/logo.png");
         if (logoResponse.ok) {
           const logoImageBytes = await logoResponse.arrayBuffer();
           const logoImage = await pdfDoc.embedPng(logoImageBytes);
@@ -71,7 +71,6 @@ const boldFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
       } catch {
         console.log("Logo not found, continuing without logo");
       }
-
 
       // -------------------------
       // HEADER: "QUOTE" and left company info
@@ -210,7 +209,13 @@ const boldFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
       // -------------------------
       const billToX = 40;
       const billToY = pageHeight - 200;
-      page.drawText("Bill To:", { x: billToX, y: billToY, size: 9, font: boldFont, color: black });
+      page.drawText("Bill To:", {
+        x: billToX,
+        y: billToY,
+        size: 9,
+        font: boldFont,
+        color: black,
+      });
       page.drawText(quoteData.customer || "-", {
         x: billToX,
         y: billToY - 14,
@@ -245,7 +250,14 @@ const boldFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
       // -------------------------
       const tableX = 40;
       const tableTopY = billToY - 140; // tuned for similarity
-      const headers = ["Item", "Description", "Quantity", "Unit Price", "Tax", "Amount NAD"];
+      const headers = [
+        "Item",
+        "Description",
+        "Quantity",
+        "Unit Price",
+        "Tax",
+        "Amount NAD",
+      ];
       const colX = [tableX, 150, 300, 350, 400, 500];
 
       // Draw table header text
@@ -271,25 +283,61 @@ const boldFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
       let rowY = tableTopY - 20;
       quoteData.lineItems.forEach((li, idx) => {
         // Item code
-        page.drawText(li.item || "-", { x: colX[0], y: rowY, size: 8, font: boldFont, color: black });
+        page.drawText(li.item || "-", {
+          x: colX[0],
+          y: rowY,
+          size: 8,
+          font: boldFont,
+          color: black,
+        });
 
         // Description (might be multi-line — naive wrapping)
         const desc = li.description || "-";
-        page.drawText(desc, { x: colX[1], y: rowY, size: 8, font, color: darkGray });
+        page.drawText(desc, {
+          x: colX[1],
+          y: rowY,
+          size: 8,
+          font,
+          color: darkGray,
+        });
 
         // Quantity
-        page.drawText(String(Number(li.quantity).toFixed(2)), { x: colX[2], y: rowY, size: 8, font, color: black });
+        page.drawText(String(Number(li.quantity).toFixed(2)), {
+          x: colX[2],
+          y: rowY,
+          size: 8,
+          font,
+          color: black,
+        });
 
         // Unit Price
-        page.drawText(Number(li.unitPrice).toFixed(2), { x: colX[3], y: rowY, size: 8, font, color: black });
+        page.drawText(Number(li.unitPrice).toFixed(2), {
+          x: colX[3],
+          y: rowY,
+          size: 8,
+          font,
+          color: black,
+        });
 
         // Tax rate
         const taxText = li.taxRate || quoteData.lineItems[0]?.taxRate || "15%";
-        page.drawText(taxText, { x: colX[4], y: rowY, size: 8, font, color: black });
+        page.drawText(taxText, {
+          x: colX[4],
+          y: rowY,
+          size: 8,
+          font,
+          color: black,
+        });
 
         // Amount
         const amount = (li.quantity || 0) * (li.unitPrice || 0);
-        page.drawText(amount.toFixed(2), { x: colX[5], y: rowY, size: 8, font: boldFont, color: black });
+        page.drawText(amount.toFixed(2), {
+          x: colX[5],
+          y: rowY,
+          size: 8,
+          font: boldFont,
+          color: black,
+        });
 
         // If description is long, move next row a bit lower. We keep consistent 28 px row height to match image spacing
         rowY -= 28;
@@ -311,67 +359,114 @@ const boldFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
       const valueX = pageWidth - 75;
 
       // Subtotal
-      page.drawText("Subtotal", { x: labelX + 30, y: totalsTopY, size: 9, font, color: black });
-      page.drawText((quoteData.subtotal ?? 0).toFixed(2), { x: valueX, y: totalsTopY, size: 9, font: boldFont, color: black });
+      page.drawText("Subtotal", {
+        x: labelX + 30,
+        y: totalsTopY,
+        size: 9,
+        font,
+        color: black,
+      });
+      page.drawText((quoteData.subtotal ?? 0).toFixed(2), {
+        x: valueX,
+        y: totalsTopY,
+        size: 9,
+        font: boldFont,
+        color: black,
+      });
 
       // TOTAL SALES TAX 15% (dynamic label if possible)
-      const taxLabel = `TOTAL SALES TAX ${quoteData.lineItems[0]?.taxRate?.replace(/[^\d%]/g, "") ?? "15%"}`;
-      page.drawText(taxLabel, { x: labelX - 25, y: totalsTopY - 18, size: 9, font, color: black });
-      page.drawText((quoteData.totalTax ?? 0).toFixed(2), { x: valueX, y: totalsTopY - 18, size: 9, font: boldFont, color: black });
+      const taxLabel = `TOTAL SALES TAX ${
+        quoteData.lineItems[0]?.taxRate?.replace(/[^\d%]/g, "") ?? "15%"
+      }`;
+      page.drawText(taxLabel, {
+        x: labelX - 25,
+        y: totalsTopY - 18,
+        size: 9,
+        font,
+        color: black,
+      });
+      page.drawText((quoteData.totalTax ?? 0).toFixed(2), {
+        x: valueX,
+        y: totalsTopY - 18,
+        size: 9,
+        font: boldFont,
+        color: black,
+      });
 
       // Separator lines
-      page.drawLine({ start: { x: labelX - 10, y: totalsTopY - 28 }, end: { x: valueX + 40, y: totalsTopY - 28 }, thickness: 1, color: black });
+      page.drawLine({
+        start: { x: labelX - 10, y: totalsTopY - 28 },
+        end: { x: valueX + 40, y: totalsTopY - 28 },
+        thickness: 1,
+        color: black,
+      });
 
       // TOTAL NAD
-      page.drawText("TOTAL NAD", { x: labelX + 10, y: totalsTopY - 42, size: 11, font: boldFont, color: black });
-      page.drawText((quoteData.total ?? 0).toFixed(2), { x: valueX, y: totalsTopY - 42, size: 11, font: boldFont, color: black });
+      page.drawText("TOTAL NAD", {
+        x: labelX + 10,
+        y: totalsTopY - 42,
+        size: 11,
+        font: boldFont,
+        color: black,
+      });
+      page.drawText((quoteData.total ?? 0).toFixed(2), {
+        x: valueX,
+        y: totalsTopY - 42,
+        size: 11,
+        font: boldFont,
+        color: black,
+      });
 
       // small underline under total (like the image)
-      page.drawLine({ start: { x: labelX - 10, y: totalsTopY - 52 }, end: { x: valueX + 40, y: totalsTopY - 52 }, thickness: 0.5, color: darkGray });
+      page.drawLine({
+        start: { x: labelX - 10, y: totalsTopY - 52 },
+        end: { x: valueX + 40, y: totalsTopY - 52 },
+        thickness: 0.5,
+        color: darkGray,
+      });
 
-// -------------------------
-// TERMS block (left side under table)
-// -------------------------
-const termsX = 40;
-const termsTopY = totalsTopY - 80;
+      // -------------------------
+      // TERMS block (left side under table)
+      // -------------------------
+      const termsX = 40;
+      const termsTopY = totalsTopY - 80;
 
-// Heading
-page.drawText("Terms", { 
-  x: termsX, 
-  y: termsTopY, 
-  size: 9, 
-  font: boldFont, 
-  color: black 
-});
+      // Heading
+      page.drawText("Terms", {
+        x: termsX,
+        y: termsTopY,
+        size: 9,
+        font: boldFont,
+        color: black,
+      });
 
-// Full-width line under "Terms"
-page.drawLine({
-  start: { x: 40, y: termsTopY - 4 },   // start from left margin
-  end: { x: pageWidth - 40, y: termsTopY - 4 }, // end near right margin
-  thickness: 1,
-  color: black,
-});
+      // Full-width line under "Terms"
+      page.drawLine({
+        start: { x: 40, y: termsTopY - 4 }, // start from left margin
+        end: { x: pageWidth - 40, y: termsTopY - 4 }, // end near right margin
+        thickness: 1,
+        color: black,
+      });
 
-// Terms text
-const termsLines = [
-  "Quotations to be confirmed at time of booking a load.",
-  "Quote validity: 28 Days",
-  "",
-  "Payment terms: Cash Clients",
-  "50% Deposit prior to load",
-  "50% Payment prior to delivery",
-];
+      // Terms text
+      const termsLines = [
+        "Quotations to be confirmed at time of booking a load.",
+        "Quote validity: 28 Days",
+        "",
+        "Payment terms: Cash Clients",
+        "50% Deposit prior to load",
+        "50% Payment prior to delivery",
+      ];
 
-termsLines.forEach((t, i) => {
-  page.drawText(t, { 
-    x: termsX, 
-    y: termsTopY - 16 - i * 11, 
-    size: 8, 
-    font, 
-    color: darkGray 
-  });
-});
-
+      termsLines.forEach((t, i) => {
+        page.drawText(t, {
+          x: termsX,
+          y: termsTopY - 16 - i * 11,
+          size: 8,
+          font,
+          color: darkGray,
+        });
+      });
 
       // -------------------------
       // Footer registration line (match text from image)
@@ -390,11 +485,20 @@ termsLines.forEach((t, i) => {
       // -------------------------
       // Save and download
       // -------------------------
+      // -------------------------
+      // Save and download
+      // -------------------------
       const pdfBytes = await pdfDoc.save();
       const blob = new Blob([pdfBytes], { type: "application/pdf" });
+
+      const currentYear = new Date().getFullYear();
+      const quoteId = quoteData.id || "0000";
+
+      const fileName = `QUOTE-${currentYear}-${quoteId}.pdf`;
+
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = `QUOTE_${quoteData.id || "quote"}.pdf`;
+      link.download = fileName;
       link.click();
     } catch (err) {
       console.error("Error generating PDF:", err);
@@ -402,8 +506,12 @@ termsLines.forEach((t, i) => {
   };
 
   return (
-    <Button onClick={handleDownloadWithData} variant="secondary" className="text-white">
-      <Download className="mr-2 h-4 w-4" /> Download Quote
+    <Button
+      onClick={handleDownloadWithData}
+      variant="secondary"
+      className="text-white"
+    >
+      <Download className="mr-2 h-4 w-4" /> Download PDF
     </Button>
   );
 }

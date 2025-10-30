@@ -637,35 +637,36 @@ export default function NewInvoicePage() {
                             )}
                           />
                         </TableCell>
-                        <TableCell>
-                          <FormField
-                            control={form.control}
-                            name={`lineItems.${index}.taxRate`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <Select
-                                  onValueChange={field.onChange}
-                                  defaultValue={field.value}
-                                  disabled={loading}
-                                >
-                                  <FormControl>
-                                    <SelectTrigger className="mt-1">
-                                      <SelectValue placeholder="Select VAT / Tax rate" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    <SelectItem value="VAT / Tax on Sales (15%)">
-                                      VAT / Tax on Sales (15%)
-                                    </SelectItem>
-                                    <SelectItem value="Exempt">
-                                      Exempt
-                                    </SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </FormItem>
-                            )}
-                          />
-                        </TableCell>
+<TableCell>
+  <FormField
+    control={form.control}
+    name={`lineItems.${index}.taxRate`}
+    render={({ field }) => (
+      <FormItem>
+        <Select
+          onValueChange={field.onChange}
+          value={field.value || "VAT / Tax on Sales (15%)"} // ✅ Default to 15% VAT
+          disabled={loading}
+        >
+          <FormControl>
+            <SelectTrigger className="mt-1">
+              <SelectValue placeholder="Select VAT / Tax rate" />
+            </SelectTrigger>
+          </FormControl>
+          <SelectContent>
+            <SelectItem value="VAT / Tax on Sales (15%)">
+              VAT / Tax on Sales (15%)
+            </SelectItem>
+            <SelectItem value="Exempt">
+              Exempt
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      </FormItem>
+    )}
+  />
+</TableCell>
+
                         <TableCell className="text-right pt-4 pr-4">
                           {taxAmount.toFixed(2)}
                         </TableCell>

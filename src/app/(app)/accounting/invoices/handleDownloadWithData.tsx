@@ -13,7 +13,8 @@ interface InvoiceData {
   subtotal: number;
   totalTax: number;
   total: number;
-  reference: string;
+  reference: string | null;
+  taxType?: string;
   lineItems: Array<{
     item: string;
     description: string;
@@ -27,6 +28,11 @@ interface DownloadWithDataProps {
 }
 
 export default function DownloadWithData({ invoiceData }: DownloadWithDataProps) {
+  function sanitizeText(text: string) {
+    if (!text) return "";
+    return text.replace(/[^\x00-\x7F]/g, "");
+  }
+
   const handleDownloadWithData = async () => {
     try {
       const pdfDoc = await PDFDocument.create();
@@ -43,7 +49,7 @@ export default function DownloadWithData({ invoiceData }: DownloadWithDataProps)
 
       // ====== LOGO ======
       try {
-        const logoResponse = await fetch("/images/Logo.png");
+        const logoResponse = await fetch("https://custom3.mystagingserver.site/logistics/logo.png");
         if (logoResponse.ok) {
           const logoImageBytes = await logoResponse.arrayBuffer();
           const logoImage = await pdfDoc.embedPng(logoImageBytes);
@@ -68,7 +74,8 @@ export default function DownloadWithData({ invoiceData }: DownloadWithDataProps)
         color: black,
       });
 
-      page.drawText("Ab-Inber Namibia (Pty) Ltd", {
+      // ====== STATIC COMPANY INFO ======
+      page.drawText("INFINITY LOGISTICS CC", {
         x: 50,
         y: pageHeight - 125,
         size: 10,
@@ -107,7 +114,7 @@ export default function DownloadWithData({ invoiceData }: DownloadWithDataProps)
         font,
         color: darkGray,
       });
-      page.drawText(invoiceData.dateIssued, {
+      page.drawText(sanitizeText(invoiceData.dateIssued), {
         x: rightColumnX,
         y: pageHeight - 115,
         size: 9,
@@ -115,14 +122,29 @@ export default function DownloadWithData({ invoiceData }: DownloadWithDataProps)
         color: black,
       });
 
-      page.drawText("Account Number", {
+      // page.drawText("Account Number", {
+      //   x: rightColumnX,
+      //   y: pageHeight - 130,
+      //   size: 9,
+      //   font,
+      //   color: darkGray,
+      // });
+      // page.drawText("AB/001", {
+      //   x: rightColumnX,
+      //   y: pageHeight - 145,
+      //   size: 9,
+      //   font: boldFont,
+      //   color: black,
+      // });
+
+      page.drawText("Invoice Number", {
         x: rightColumnX,
         y: pageHeight - 130,
         size: 9,
         font,
         color: darkGray,
       });
-      page.drawText("AB/001", {
+      page.drawText(sanitizeText(invoiceData.id), {
         x: rightColumnX,
         y: pageHeight - 145,
         size: 9,
@@ -130,14 +152,14 @@ export default function DownloadWithData({ invoiceData }: DownloadWithDataProps)
         color: black,
       });
 
-      page.drawText("Invoice Number", {
+      page.drawText("Reference", {
         x: rightColumnX,
         y: pageHeight - 160,
         size: 9,
         font,
         color: darkGray,
       });
-      page.drawText(invoiceData.id, {
+      page.drawText(sanitizeText(invoiceData.reference || "-"), {
         x: rightColumnX,
         y: pageHeight - 175,
         size: 9,
@@ -145,14 +167,14 @@ export default function DownloadWithData({ invoiceData }: DownloadWithDataProps)
         color: black,
       });
 
-      page.drawText("Reference", {
+      page.drawText("VAT Reg No.", {
         x: rightColumnX,
         y: pageHeight - 190,
         size: 9,
         font,
         color: darkGray,
       });
-      page.drawText(invoiceData.reference || "-", {
+      page.drawText("10251820", {
         x: rightColumnX,
         y: pageHeight - 205,
         size: 9,
@@ -160,24 +182,9 @@ export default function DownloadWithData({ invoiceData }: DownloadWithDataProps)
         color: black,
       });
 
-      page.drawText("VAT Reg ncc", {
-        x: rightColumnX,
-        y: pageHeight - 220,
-        size: 9,
-        font,
-        color: darkGray,
-      });
-      page.drawText("10251820", {
-        x: rightColumnX,
-        y: pageHeight - 235,
-        size: 9,
-        font: boldFont,
-        color: black,
-      });
-
       // ====== BILL TO ======
       const billToY = pageHeight - 100;
-      page.drawText(invoiceData.customer.toUpperCase(), {
+      page.drawText(sanitizeText(invoiceData.customer), {
         x: 450,
         y: billToY,
         size: 11,
@@ -195,7 +202,7 @@ export default function DownloadWithData({ invoiceData }: DownloadWithDataProps)
         "NAMIBIA",
       ];
       addressLines.forEach((line, i) => {
-        page.drawText(line, {
+        page.drawText(sanitizeText(line), {
           x: 450,
           y: billToY - 20 - i * 15,
           size: 9,
@@ -207,7 +214,7 @@ export default function DownloadWithData({ invoiceData }: DownloadWithDataProps)
       // ====== TABLE ======
       const tableTopY = billToY - 190;
       const headers = ["Item", "Description", "Quantity", "Unit Price", "Amount"];
-      const headerPositions = [50, 120, 320, 400, 500];
+      const headerPositions = [50, 180, 320, 400, 500];
 
       headers.forEach((header, i) => {
         page.drawText(header, {
@@ -227,15 +234,25 @@ export default function DownloadWithData({ invoiceData }: DownloadWithDataProps)
       });
 
       let rowY = tableTopY - 25;
-      invoiceData.lineItems.forEach((item) => {
-        page.drawText(item.item, { x: 50, y: rowY, size: 8, font, color: black });
-        page.drawText(item.description, { x: 120, y: rowY, size: 8, font, color: black });
+      const items = invoiceData.lineItems && invoiceData.lineItems.length > 0
+        ? invoiceData.lineItems
+        : [
+            { item: "Logistics Service", description: "Freight Handling", quantity: 1, unitPrice: 1000 },
+            { item: "Delivery Charge", description: "Local Transport", quantity: 2, unitPrice: 500 },
+          ];
+
+      items.forEach((item) => {
+        page.drawText(sanitizeText(item.item), { x: 50, y: rowY, size: 8, font, color: black });
+        page.drawText(sanitizeText(item.description), { x: 180, y: rowY, size: 8, font, color: black });
         page.drawText(item.quantity.toString(), { x: 320, y: rowY, size: 8, font, color: black });
         page.drawText(item.unitPrice.toFixed(2), { x: 400, y: rowY, size: 8, font, color: black });
-        page.drawText(
-          (item.quantity * item.unitPrice).toFixed(2),
-          { x: 500, y: rowY, size: 8, font: boldFont, color: black }
-        );
+        page.drawText((item.quantity * item.unitPrice).toFixed(2), {
+          x: 500,
+          y: rowY,
+          size: 8,
+          font: boldFont,
+          color: black,
+        });
         rowY -= 20;
       });
 
@@ -245,11 +262,15 @@ export default function DownloadWithData({ invoiceData }: DownloadWithDataProps)
       const amountColumnX = 550;
       const amountStartX = amountColumnX - 60;
 
-      page.drawText("Subtotal", { x: labelColumnX + 60, y: totalsY, size: 9, font, color: black });
-      page.drawText(invoiceData.subtotal.toFixed(2), { x: amountStartX, y: totalsY, size: 9, font: boldFont, color: black });
+      const subtotal = invoiceData.subtotal;
+      const totalTax = invoiceData.totalTax || 0;
+      const total = invoiceData.total || subtotal + totalTax;
 
-      page.drawText("TOTAL SALES VAT / TAX 15%", { x: labelColumnX, y: totalsY - 15, size: 9, font, color: black });
-      page.drawText(invoiceData.totalTax.toFixed(2), { x: amountStartX, y: totalsY - 15, size: 9, font: boldFont, color: black });
+      page.drawText("Subtotal", { x: labelColumnX + 80, y: totalsY, size: 9, font, color: black });
+      page.drawText(subtotal.toFixed(2), { x: amountStartX + 30, y: totalsY, size: 9, font: boldFont, color: black });
+
+      page.drawText("TOTAL SALES VAT / TAX 15%", { x: labelColumnX , y: totalsY - 15, size: 9, font, color: black });
+      page.drawText(totalTax.toFixed(2), { x: amountStartX + 30, y: totalsY - 15, size: 9, font: boldFont, color: black });
 
       page.drawLine({
         start: { x: labelColumnX, y: totalsY - 25 },
@@ -258,12 +279,12 @@ export default function DownloadWithData({ invoiceData }: DownloadWithDataProps)
         color: black,
       });
 
-      page.drawText("TOTAL NAD", { x: labelColumnX + 35, y: totalsY - 40, size: 11, font: boldFont, color: black });
-      page.drawText(invoiceData.total.toFixed(2), { x: amountStartX, y: totalsY - 40, size: 11, font: boldFont, color: black });
+      page.drawText("TOTAL NAD", { x: labelColumnX + 55, y: totalsY - 40, size: 11, font: boldFont, color: black });
+      page.drawText(total.toFixed(2), { x: amountStartX + 30, y: totalsY - 40, size: 11, font: boldFont, color: black });
 
       // ====== DUE DATE + BANK DETAILS ======
       const bottomSectionY = totalsY - 80;
-      page.drawText(`Due Date: ${invoiceData.dueDate}`, {
+      page.drawText(sanitizeText(`Due Date: ${invoiceData.dueDate}`), {
         x: 50,
         y: bottomSectionY,
         size: 10,
@@ -272,7 +293,7 @@ export default function DownloadWithData({ invoiceData }: DownloadWithDataProps)
       });
 
       const bankDetails = [
-        "FIRB NAMIBIA",
+        "FNB NAMIBIA",
         "ACCOUNT NAME: INFINITY LOGISTICS CC",
         "ACCOUNT NUMBER: 50272992919",
         "BRANCH: AUZEPANPAYAT",
@@ -286,7 +307,7 @@ export default function DownloadWithData({ invoiceData }: DownloadWithDataProps)
         "SWIFT CODE: 581864400X",
       ];
       bankDetails.forEach((line, i) => {
-        page.drawText(line, {
+        page.drawText(sanitizeText(line), {
           x: 50,
           y: bottomSectionY - 25 - i * 12,
           size: 8,
@@ -295,28 +316,35 @@ export default function DownloadWithData({ invoiceData }: DownloadWithDataProps)
         });
       });
 
-      const clickableText = "View and pay online now";
-      const clickableTextY = bottomSectionY - 25 - bankDetails.length * 12 - 20;
-      page.drawText(clickableText, { x: 50, y: clickableTextY, size: 10, font: boldFont, color: greenColor });
-      page.drawLine({
-        start: { x: 50, y: clickableTextY - 2 },
-        end: { x: 50 + font.widthOfTextAtSize(clickableText, 10), y: clickableTextY - 2 },
-        thickness: 1,
-        color: greenColor,
-      });
+      // const clickableText = sanitizeText("View and pay online now");
+      // const clickableTextY = bottomSectionY - 25 - bankDetails.length * 12 - 20;
+      // page.drawText(clickableText, { x: 50, y: clickableTextY, size: 10, font: boldFont, color: greenColor });
+      // page.drawLine({
+      //   start: { x: 50, y: clickableTextY - 2 },
+      //   end: { x: 50 + font.widthOfTextAtSize(clickableText, 10), y: clickableTextY - 2 },
+      //   thickness: 1,
+      //   color: greenColor,
+      // });
 
       page.drawText(
-        "Company Registration No. CC201903064. Registration Office: P.O Box 29111; Kujugaku street, Northern Industrial, Windhoek, Unit 27 Balbo park, Windhoek, 9000, Namibia.",
+        sanitizeText(
+          "Company Registration No. CC201903064. Registration Office: P.O Box 29111; Kujugaku street, Northern Industrial, Windhoek, Unit 27 Balbo park, Windhoek, 9000, Namibia."
+        ),
         { x: 30, y: 30, size: 7, font, color: darkGray }
       );
 
       // ====== DOWNLOAD ======
       const pdfBytes = await pdfDoc.save();
       const blob = new Blob([pdfBytes], { type: "application/pdf" });
+      const currentYear = new Date().getFullYear();
+      const invoiceId = sanitizeText(invoiceData.id );
+      const fileName = `INV-${currentYear}-${invoiceId}.pdf`;
+
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = `TAX-INVOICE_${invoiceData.id}.pdf`;
+      link.download = fileName;
       link.click();
+      URL.revokeObjectURL(link.href);
     } catch (err) {
       console.error("Error generating PDF:", err);
     }
@@ -324,7 +352,7 @@ export default function DownloadWithData({ invoiceData }: DownloadWithDataProps)
 
   return (
     <Button onClick={handleDownloadWithData} variant="secondary" className="text-white">
-      <Download className="mr-2 h-4 w-4" /> Download Attachment
+      <Download className="mr-2 h-4 w-4" /> Download PDF
     </Button>
   );
 }
