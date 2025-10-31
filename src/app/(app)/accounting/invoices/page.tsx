@@ -26,6 +26,7 @@ export default function InvoicesPage() {
 
   const statusParam = searchParams.get("status")?.toLowerCase();
 
+  /* ---------------- Fetch invoices ---------------- */
   useEffect(() => {
     async function fetchData() {
       const data = await getInvoices();
@@ -34,6 +35,7 @@ export default function InvoicesPage() {
     fetchData();
   }, []);
 
+  /* ---------------- Handle tab default ---------------- */
   useEffect(() => {
     if (statusParam === "draft") setDefaultTab("draft");
     else if (statusParam === "paid") setDefaultTab("paid");
@@ -42,11 +44,13 @@ export default function InvoicesPage() {
     else setDefaultTab("all");
   }, [statusParam]);
 
+  /* ---------------- Filtered data ---------------- */
   const paidInvoices = invoices.filter((i) => i.status === "Paid");
   const unpaidInvoices = invoices.filter((i) => i.status === "Unpaid");
   const overdueInvoices = invoices.filter((i) => i.status === "Overdue");
   const draftInvoices = invoices.filter((i) => i.status === "Draft");
 
+  /* ---------------- Bulk allocate ---------------- */
   const handleBulkAllocate = () => {
     if (selectedInvoices.length === 0) {
       alert("Please select at least one invoice before allocating payment.");
@@ -55,8 +59,10 @@ export default function InvoicesPage() {
     setShowInvoiceModal(true);
   };
 
+  /* ---------------- UI ---------------- */
   return (
     <div className="flex-1 space-y-8">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link href="/dashboard">
@@ -90,6 +96,7 @@ export default function InvoicesPage() {
         </div>
       </div>
 
+      {/* Tabs */}
       <Tabs defaultValue={defaultTab} key={defaultTab}>
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="all">All</TabsTrigger>
@@ -99,6 +106,7 @@ export default function InvoicesPage() {
           <TabsTrigger value="overdue">Overdue</TabsTrigger>
         </TabsList>
 
+        {/* ALL */}
         <TabsContent value="all">
           <Card>
             <CardHeader>
@@ -113,8 +121,79 @@ export default function InvoicesPage() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* DRAFT */}
+        <TabsContent value="draft">
+          <Card>
+            <CardHeader>
+              <CardTitle>Draft Invoices</CardTitle>
+              <CardDescription>
+                Invoices that have not been sent yet.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              <InvoiceTable
+                invoices={draftInvoices}
+                onSelectionChange={setSelectedInvoices}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* UNPAID */}
+        <TabsContent value="unpaid">
+          <Card>
+            <CardHeader>
+              <CardTitle>Unpaid Invoices</CardTitle>
+              <CardDescription>Invoices awaiting payment.</CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              <InvoiceTable
+                invoices={unpaidInvoices}
+                onSelectionChange={setSelectedInvoices}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* PAID */}
+        <TabsContent value="paid">
+          <Card>
+            <CardHeader>
+              <CardTitle>Paid Invoices</CardTitle>
+              <CardDescription>
+                Invoices that have been successfully paid.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              <InvoiceTable
+                invoices={paidInvoices}
+                onSelectionChange={setSelectedInvoices}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* OVERDUE */}
+        <TabsContent value="overdue">
+          <Card>
+            <CardHeader>
+              <CardTitle>Overdue Invoices</CardTitle>
+              <CardDescription>
+                Invoices that are past their due date.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              <InvoiceTable
+                invoices={overdueInvoices}
+                onSelectionChange={setSelectedInvoices}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
 
+      {/* MODAL */}
       <InvoiceModal
         open={showInvoiceModal}
         onClose={() => setShowInvoiceModal(false)}
